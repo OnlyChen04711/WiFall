@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>无恙 · 用 WiFi 守住家人的平安</title>
+<meta name="description" content="无恙是一个关于 WiFi 无感守护的构想：不装摄像头、不戴设备，用家里的 WiFi 信号感知跌倒，先问一句，再叫家人。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="无恙 · 用 WiFi 守住家人的平安">
+<meta property="og:description" content="不装摄像头、不戴设备。一次跌倒之后，它先问一句，十秒没有回应，再叫家人。">
+<meta name="theme-color" content="#F6F2EA">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314211C'/%3E%3Ccircle cx='16' cy='22' r='2.2' fill='%237FD3AE'/%3E%3Cpath d='M9 16a10 10 0 0 1 14 0M12 19a6 6 0 0 1 8 0' stroke='%237FD3AE' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
+<style>
+  :root{
+    --paper:#F6F2EA;
+    --paper-2:#EFE8DB;
+    --white:#FFFDF8;
+    --ink:#14211C;
+    --ink-2:#2B3A33;
+    --muted:#6B7A72;
+    --line:rgba(20,33,28,.13);
+    --green:#1E6B57;
+    --mint:#BFE3D2;
+    --mint-2:#7FD3AE;
+    --coral:#C0503A;
+    --coral-soft:#F3E0D9;
+    --amber:#A9772F;
+    --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",Georgia,serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --dark:#101B17;
+    --dark-2:#16241F;
+    --dark-line:rgba(255,255,255,.13);
+    --dark-text:#EFE9DC;
+    --dark-muted:#93A39B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:96px;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--mint);color:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4{text-wrap:balance}
+  p{text-wrap:pretty}
+  img,svg{display:block}
+  .wrap{width:min(1180px,calc(100% - 88px));margin:0 auto}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---------- nav ---------- */
+  .nav{position:fixed;inset:0 0 auto 0;z-index:60;height:76px;display:flex;align-items:center;transition:background .35s ease,border-color .35s ease,backdrop-filter .35s}
+  .nav.scrolled{background:rgba(246,242,234,.86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:flex-start;gap:46px;width:min(1180px,calc(100% - 88px));margin:0 auto}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--ink);display:grid;place-items:center;flex:none}
+  .brand-mark svg{width:20px;height:20px}
+  .brand-txt{display:flex;flex-direction:column;line-height:1.15}
+  .brand-name{font-family:var(--serif);font-size:21px;letter-spacing:.06em}
+  .brand-sub{font-size:10px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .nav-links{display:flex;align-items:center;gap:30px}
+  .nav-links a{font-size:13.5px;color:var(--ink-2);position:relative;padding:4px 0;transition:color .2s}
+  .nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;background:var(--green);transition:right .25s ease}
+  .nav-links a:hover{color:var(--green)}
+  .nav-links a:hover::after{right:0}
+  .nav-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--green);border:1px solid rgba(30,107,87,.3);background:rgba(191,227,210,.35);padding:6px 11px;border-radius:999px;white-space:nowrap}
+  .nav-right{display:flex;align-items:center;gap:14px;margin-left:auto}
+  .lang{display:inline-flex;align-items:center;gap:1px;border:1px solid rgba(20,33,28,.16);border-radius:999px;padding:3px;background:rgba(255,253,248,.4)}
+  .lang button{border:0;background:transparent;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);padding:5px 9px;border-radius:999px;cursor:pointer;line-height:1.2;transition:color .2s,background .2s}
+  .lang button:hover{color:var(--ink)}
+  .lang button.on{background:var(--ink);color:var(--paper)}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:172px 0 96px;overflow:hidden}
+  .hero::before{content:"";position:absolute;width:820px;height:820px;right:-200px;top:-260px;background:radial-gradient(circle at center,rgba(191,227,210,.75),rgba(191,227,210,0) 62%);pointer-events:none}
+  .hero::after{content:"";position:absolute;width:560px;height:560px;left:-260px;top:240px;background:radial-gradient(circle at center,rgba(243,224,217,.55),rgba(243,224,217,0) 65%);pointer-events:none}
+  .hero-grid{position:relative;display:grid;grid-template-columns:1.06fr .94fr;gap:72px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  .eyebrow::before{content:"";width:26px;height:1px;background:currentColor;opacity:.55}
+  .hero h1{font-family:var(--serif);font-size:clamp(44px,5.4vw,76px);line-height:1.18;letter-spacing:.01em;font-weight:600;margin:26px 0 28px;color:var(--ink)}
+  .hero h1 .hl{background:linear-gradient(transparent 62%,rgba(191,227,210,.95) 62%,rgba(191,227,210,.95) 94%,transparent 94%);padding:0 .06em}
+  .hero-lead{font-size:17.5px;line-height:1.9;color:var(--ink-2);max-width:33em}
+  .hero-lead strong{font-weight:600;color:var(--ink);border-bottom:1px solid rgba(20,33,28,.3);padding-bottom:1px}
+  .hero-cta{display:flex;align-items:center;gap:16px;margin-top:38px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;font-size:14.5px;font-weight:500;letter-spacing:.02em;border:1px solid transparent;cursor:pointer;transition:transform .2s ease,background .2s,color .2s,border-color .2s;font-family:var(--sans)}
+  .btn svg{width:15px;height:15px;transition:transform .25s}
+  .btn-primary{background:var(--ink);color:var(--paper)}
+  .btn-primary:hover{background:var(--green);transform:translateY(-1px)}
+  .btn-primary:hover svg{transform:translateX(3px)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:rgba(20,33,28,.25)}
+  .btn-ghost:hover{border-color:var(--ink);background:rgba(255,253,248,.6);transform:translateY(-1px)}
+  .hero-meta{display:flex;gap:26px;margin-top:44px;flex-wrap:wrap}
+  .hero-meta span{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);letter-spacing:.02em}
+  .hero-meta i{width:5px;height:5px;border-radius:50%;background:var(--green);flex:none}
+
+  /* monitor card */
+  .monitor{position:relative;background:var(--dark);border-radius:22px;padding:24px 24px 20px;color:var(--dark-text);box-shadow:0 40px 80px -40px rgba(16,27,23,.55),0 2px 0 rgba(255,255,255,.06) inset;border:1px solid rgba(255,255,255,.09)}
+  .monitor::after{content:"";position:absolute;inset:0;border-radius:22px;background:radial-gradient(600px 200px at 80% -10%,rgba(127,211,174,.13),transparent 60%);pointer-events:none}
+  .monitor-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.08em;color:var(--dark-muted);margin-bottom:20px}
+  .live{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);letter-spacing:.14em;font-size:10.5px;color:var(--mint-2)}
+  .live i{width:6px;height:6px;border-radius:50%;background:var(--mint-2);box-shadow:0 0 0 0 rgba(127,211,174,.6);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,211,174,.55)}70%{box-shadow:0 0 0 7px rgba(127,211,174,0)}100%{box-shadow:0 0 0 0 rgba(127,211,174,0)}}
+  .monitor-body{position:relative;height:186px;padding:0;border-bottom:1px solid var(--dark-line);overflow:hidden}
+  .fp{position:relative;width:100%;height:100%;overflow:hidden}
+  .fp svg{display:block;width:100%;height:100%}
+  .fp-glow{position:absolute;left:37.7%;top:55.4%;width:250px;height:250px;margin:-125px 0 0 -125px;border-radius:50%;background:radial-gradient(circle,rgba(127,211,174,.12),rgba(127,211,174,0) 70%);pointer-events:none}
+  .fp-sweep{position:absolute;left:37.7%;top:55.4%;width:600px;height:600px;margin:-300px 0 0 -300px;border-radius:50%;background:conic-gradient(from 0deg,rgba(127,211,174,0) 0deg,rgba(127,211,174,.03) 24deg,rgba(127,211,174,.20) 36deg,rgba(127,211,174,0) 38deg);-webkit-mask:radial-gradient(circle,#000 5%,rgba(0,0,0,.5) 34%,transparent 64%);mask:radial-gradient(circle,#000 5%,rgba(0,0,0,.5) 34%,transparent 64%);animation:fpSweep 9s linear infinite;pointer-events:none}
+  @keyframes fpSweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .fp-person{animation:fpPerson 3.2s ease-in-out infinite}
+  @keyframes fpPerson{0%,100%{opacity:.55}50%{opacity:1}}
+  .monitor-body .bars{display:flex;align-items:flex-end;gap:2.5px;width:100%;height:100%}
+  .monitor-body .bars i{flex:1;min-width:2px;background:linear-gradient(180deg,var(--mint-2),rgba(127,211,174,.22));border-radius:1.5px;height:20%;transition:height .16s ease-out}
+  .monitor-foot{display:flex;justify-content:space-between;gap:12px;padding-top:16px}
+  .monitor-foot div{display:flex;flex-direction:column;gap:3px}
+  .monitor-foot .k{font-size:10px;letter-spacing:.16em;color:var(--dark-muted);text-transform:uppercase}
+  .monitor-foot .v{font-size:13.5px;color:var(--dark-text)}
+  .monitor-note{margin-top:18px;font-size:12px;line-height:1.7;color:var(--dark-muted);border-top:1px solid var(--dark-line);padding-top:14px}
+  .monitor-note em{font-style:normal;color:var(--mint-2)}
+
+  /* ---------- section shell ---------- */
+  section{position:relative}
+  .sec{padding:108px 0}
+  .sec-head{max-width:760px;margin-bottom:56px}
+  .sec-head h2{font-family:var(--serif);font-size:clamp(32px,3.9vw,50px);line-height:1.28;font-weight:600;letter-spacing:.005em;margin:20px 0 18px}
+  .sec-head .lede{font-size:16px;line-height:1.9;color:var(--muted);max-width:38em}
+  .sec-num{color:var(--green)}
+  .center{text-align:center;margin-left:auto;margin-right:auto}
+  .center .lede{margin-left:auto;margin-right:auto}
+  .nw{white-space:nowrap}
+  .sec-head h2.h2-sm{font-size:clamp(26px,3.9vw,50px)}
+
+  /* problem */
+  .problem{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:8px}
+  .stat{padding:34px 34px 30px;border-bottom:1px solid var(--line)}
+  .stat + .stat{border-left:1px solid var(--line)}
+  .stat-n{font-family:var(--serif);font-size:clamp(40px,4.6vw,58px);line-height:1;color:var(--ink);display:flex;align-items:baseline;gap:4px}
+  .stat-n span{font-size:.42em;font-family:var(--sans);color:var(--muted);font-weight:400;letter-spacing:.04em}
+  .stat p{font-size:13.5px;line-height:1.7;color:var(--ink-2);margin-top:16px;max-width:16em}
+  .stat .src{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:10px;text-transform:uppercase}
+  .problem-foot{display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;margin-top:64px;align-items:start}
+  .problem-quote{font-family:var(--serif);font-size:clamp(24px,2.5vw,31px);line-height:1.55;color:var(--ink)}
+  .problem-quote span{color:var(--coral)}
+  .problem-body p{font-size:15px;line-height:2;color:var(--ink-2);margin-bottom:16px}
+  .problem-body p:last-child{margin-bottom:0;color:var(--muted)}
+
+  /* idea */
+  .cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:30px 28px 28px;transition:transform .3s ease,box-shadow .3s ease,border-color .3s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 22px 40px -30px rgba(20,33,28,.35);border-color:rgba(20,33,28,.22)}
+  .card-ico{width:46px;height:46px;border-radius:12px;background:rgba(191,227,210,.45);display:grid;place-items:center;color:var(--green);margin-bottom:22px}
+  .card-ico svg{width:23px;height:23px}
+  .card h3{font-size:17px;font-weight:600;letter-spacing:.01em;margin-bottom:10px;display:flex;align-items:baseline;gap:10px}
+  .card h3 em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.1em}
+  .card p{font-size:13.8px;line-height:1.85;color:var(--muted)}
+  .idea-strip{margin-top:52px;border:1px solid var(--line);border-radius:18px;background:rgba(239,232,219,.5);padding:30px 36px;display:flex;align-items:center;gap:26px}
+  .idea-strip .q{font-family:var(--serif);font-size:22px;line-height:1.6;flex:1}
+  .idea-strip .q b{font-weight:600;border-bottom:2px solid var(--mint-2);padding-bottom:2px}
+  .idea-strip .seal{flex:none;width:64px;height:64px;border-radius:50%;border:1px solid rgba(30,107,87,.35);display:grid;place-items:center;font-family:var(--serif);font-size:11px;color:var(--green);letter-spacing:.1em;line-height:1.3;text-align:center;transform:rotate(-8deg)}
+
+  /* privacy */
+  .privacy{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .privacy-demo{margin-top:10px}
+  .seg-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px;flex-wrap:wrap}
+  .seg{display:inline-flex;padding:4px;gap:2px;background:rgba(20,33,28,.07);border-radius:999px}
+  .seg-btn{border:0;background:transparent;font-family:var(--sans);font-size:12.5px;color:var(--muted);padding:8px 20px;border-radius:999px;cursor:pointer;transition:.25s;letter-spacing:.02em}
+  .seg-btn:hover{color:var(--ink)}
+  .seg-btn.on{background:var(--ink);color:var(--paper);box-shadow:0 2px 6px rgba(16,27,23,.18)}
+  .seg-note{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted)}
+  .cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .cmp-card{display:flex;flex-direction:column;background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px 22px 18px;transition:border-color .35s,background .35s}
+  .privacy-demo[data-scene="bath"] .cmp-card[data-v="no"]{border-color:rgba(192,80,58,.26);background:rgba(255,253,248,.72)}
+  .cmp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .cmp-name{font-size:15px;font-weight:600;letter-spacing:.02em}
+  .verdict{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;padding:4px 8px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+  .v-no{color:var(--coral);background:rgba(243,224,217,.55);border-color:rgba(192,80,58,.25)}
+  .v-yes{color:var(--green);background:rgba(191,227,210,.4);border-color:rgba(30,107,87,.22)}
+  .cmp-art{margin:18px 0 16px;color:var(--ink-2);transition:opacity .35s}
+  .cmp-art svg{width:100%;height:88px}
+  .privacy-demo[data-scene="bath"] .cmp-card[data-v="no"] .cmp-art{opacity:.55}
+  .slash{opacity:0;transition:opacity .35s}
+  .privacy-demo[data-scene="bath"] .art-cam .slash,.privacy-demo[data-scene="bath"] .art-watch .slash{opacity:1}
+  .rec{opacity:0;transition:opacity .35s}
+  .privacy-demo[data-scene="living"] .rec{opacity:1}
+  .art-cam .ico,.art-watch .ico{transition:transform .45s cubic-bezier(.3,1.1,.5,1)}
+  .privacy-demo[data-scene="bath"] .art-watch .ico{transform:rotate(-7deg) translateY(3px)}
+  .art-wifi .wave{opacity:.25;animation:wave 3.2s ease-in-out infinite}
+  .cmp-body{flex:1}
+  .cmp-state h4{font-size:15.5px;font-weight:600;letter-spacing:.01em;margin-bottom:8px}
+  .cmp-state p{font-size:13px;line-height:1.8;color:var(--muted)}
+  .cmp-tag{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--muted)}
+  .cmp-caption{margin-top:20px;padding-left:14px;border-left:2px solid var(--mint-2);font-size:13px;line-height:1.8;color:var(--ink-2)}
+  .privacy-demo[data-scene="bath"] .v-living,.privacy-demo[data-scene="bath"] .s-living,.privacy-demo[data-scene="bath"] .c-living{display:none}
+  .privacy-demo[data-scene="living"] .v-bath,.privacy-demo[data-scene="living"] .s-bath,.privacy-demo[data-scene="living"] .c-bath{display:none}
+  .privacy-foot{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;margin-top:60px;padding-top:38px;border-top:1px solid rgba(20,33,28,.15)}
+  .privacy-quote{font-family:var(--serif);font-size:clamp(23px,2.6vw,32px);line-height:1.55;letter-spacing:.01em}
+  .privacy-quote span{color:var(--green);border-bottom:1px solid rgba(30,107,87,.4);padding-bottom:2px}
+  .p-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+  .p-chips span{font-size:11.5px;color:var(--green);border:1px solid rgba(30,107,87,.28);background:rgba(191,227,210,.35);border-radius:999px;padding:6px 12px;letter-spacing:.02em}
+
+  /* how */
+  .how{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:6px}
+  .step{position:relative;padding:34px 26px 30px;border-top:1px solid var(--line)}
+  .step::before{content:"";position:absolute;top:-4px;left:26px;width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .step:not(:first-child){border-left:1px solid var(--line)}
+  .step-no{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--muted)}
+  .step h3{font-size:16.5px;font-weight:600;margin:14px 0 10px;letter-spacing:.02em}
+  .step h3 i{font-style:normal;font-family:var(--serif);color:rgba(30,107,87,.35);margin-right:8px}
+  .step p{font-size:13.4px;line-height:1.85;color:var(--muted)}
+  .tech-note{margin-top:44px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;border:1px dashed rgba(20,33,28,.25);border-radius:16px;padding:24px 28px;background:rgba(246,242,234,.6)}
+  .tech-note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--green);border:1px solid rgba(30,107,87,.3);padding:5px 9px;border-radius:6px;white-space:nowrap;margin-top:3px}
+  .tech-note p{font-size:13.4px;line-height:1.85;color:var(--muted)}
+  .tech-note strong{color:var(--ink-2);font-weight:600}
+
+  /* demo */
+  .demo-sec{padding:104px 0}
+  .demo-panel{position:relative;margin-top:40px}
+  .stage{position:relative;height:clamp(380px,44vw,520px);border-radius:22px;overflow:hidden;background:#0A1310;border:1px solid rgba(255,255,255,.07);box-shadow:0 30px 60px -40px rgba(16,27,23,.55)}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .5s}
+  .stage.scened canvas{opacity:.22}
+  .hud{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;pointer-events:none;z-index:3}
+  .hud-room{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:rgba(239,233,220,.5)}
+  .hud-state{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--dark-text);background:rgba(10,19,16,.7);border:1px solid rgba(255,255,255,.1);padding:6px 11px;border-radius:999px}
+  .hud-state i{width:6px;height:6px;border-radius:50%;background:var(--mint-2);box-shadow:0 0 8px rgba(127,211,174,.9);flex:none}
+  .hud-state.warn i{background:#E0A45A;box-shadow:0 0 10px rgba(224,164,90,.9)}
+  .hud-state.alert i{background:#E8845C;box-shadow:0 0 10px rgba(232,132,92,.9)}
+  .phone{position:absolute;right:22px;top:50%;width:246px;padding:15px 16px;border-radius:16px;background:rgba(13,24,20,.9);border:1px solid rgba(127,211,174,.24);opacity:0;transform:translate(14px,-50%);transition:opacity .35s,transform .35s,border-color .35s;pointer-events:none;z-index:4}
+  .phone.on{opacity:1;transform:translate(0,-50%)}
+  .phone.ring{border-color:rgba(232,132,92,.5)}
+  .phone-row{display:flex;align-items:center;gap:12px}
+  .phone .pi{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(127,211,174,.12);flex:none;transform-origin:50% 60%}
+  .phone .pi svg{width:16px;height:16px;stroke:var(--mint-2);fill:none;stroke-width:1.6}
+  .phone.ring .pi{animation:ringing .9s ease-in-out infinite}
+  @keyframes ringing{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+  .phone b{display:block;font-size:13.5px;font-weight:500;color:var(--dark-text);letter-spacing:.02em}
+  .phone span{display:block;font-size:11.5px;color:var(--dark-muted);margin-top:2px}
+  .phone .bar{display:flex;align-items:flex-end;gap:2px;height:16px;margin-left:auto}
+  .phone .bar i{width:2px;background:var(--mint-2);opacity:.7;border-radius:1px}
+  .vscene{position:absolute;left:50%;top:50%;width:min(540px,80%);opacity:0;transform:translate(-50%,-46%) scale(.96);transition:opacity .5s,transform .5s;pointer-events:none;z-index:2}
+  .vscene.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .vscene svg{width:100%;height:auto;display:block}
+  .vscene .knock{opacity:.55;animation:knock 1.5s ease-out infinite}
+  .vscene .knock:nth-child(2){animation-delay:.18s}
+  .vscene .knock:nth-child(3){animation-delay:.36s}
+  @keyframes knock{0%{opacity:0}18%{opacity:.8}100%{opacity:0}}
+  .vscene .lamp{animation:lamp 1.1s steps(1,end) infinite}
+  @keyframes lamp{0%,49%{opacity:1}50%,100%{opacity:.25}}
+  .sub{position:absolute;left:22px;right:22px;bottom:20px;z-index:3;pointer-events:none}
+  .sub p{font-size:clamp(15px,1.6vw,19px);color:#F1EBDD;letter-spacing:.01em;text-shadow:0 2px 18px rgba(0,0,0,.5)}
+  .sub p b{color:var(--mint-2);font-weight:500}
+  .demo-bar{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+  @media (max-width:520px){ .d-play{padding:10px 16px;font-size:12.5px} .d-reset{padding:9px 14px;font-size:12px} .d-ans{padding:9px 12px;font-size:11.5px} .demo-bar{gap:8px} .d-prog{min-width:60px} }
+  .d-play{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:11px 20px;font-size:13.5px;font-family:var(--sans);cursor:pointer;transition:transform .2s,background .2s}
+  .d-play:hover{transform:translateY(-1px);background:#1B2C25}
+  .d-play svg{width:11px;height:11px;fill:currentColor}
+  .d-reset{background:transparent;border:1px solid rgba(20,33,28,.2);color:var(--ink-2);border-radius:999px;padding:10px 18px;font-size:13px;font-family:var(--sans);cursor:pointer;transition:border-color .2s,color .2s}
+  .d-reset:hover{border-color:var(--green);color:var(--green)}
+  .d-prog{flex:1;min-width:100px;height:2px;background:rgba(20,33,28,.12);border-radius:2px;overflow:hidden}
+  .d-prog i{display:block;height:100%;width:0;background:var(--green);border-radius:2px}
+  .d-ans{border:1px solid rgba(20,33,28,.18);background:transparent;color:var(--muted);border-radius:999px;padding:10px 16px;font-size:12.5px;font-family:var(--sans);cursor:pointer;transition:all .2s}
+  .d-ans:not(:disabled){border-color:rgba(30,107,87,.55);color:var(--green)}
+  .d-ans:not(:disabled):hover{background:rgba(30,107,87,.08)}
+  .d-ans:disabled{opacity:.55;cursor:default}
+  .demo-note{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);margin-top:10px}
+  @media (max-width:820px){
+    .stage{height:clamp(360px,110vw,520px);border-radius:18px}
+    .phone{display:none}
+    .phone.on{transform:translate(0,0)}
+    .phone b{font-size:12.5px}
+    .phone span{font-size:10.5px}
+    .sub{top:44px;bottom:auto;left:14px;right:14px}
+    .sub p{font-size:13.5px}
+    .hud{top:14px;left:14px;right:14px}
+    .sub{left:16px;right:16px;bottom:16px}
+    .vscene{width:96%}
+  }
+
+  /* policy table */
+  .policy-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:var(--white)}
+  table.policy{width:100%;border-collapse:collapse;min-width:720px}
+  table.policy th{text-align:left;font-size:10.5px;letter-spacing:.16em;color:var(--muted);font-weight:500;text-transform:uppercase;padding:20px 26px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  table.policy td{padding:22px 26px;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink-2);vertical-align:top}
+  table.policy tr:last-child td{border-bottom:none}
+  table.policy td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--green);white-space:nowrap}
+  table.policy td b{font-weight:600;color:var(--ink);display:block;margin-bottom:3px}
+  table.policy td b + span{color:var(--muted);font-size:12.8px}
+  table.policy tr:hover td{background:rgba(191,227,210,.12)}
+  .policy-note{margin-top:18px;font-size:12.5px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+  .policy-note::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--coral);margin-top:9px;flex:none}
+
+  /* scenes */
+  .scenes{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .scene{border:1px solid var(--line);border-radius:18px;padding:30px 28px;background:var(--paper);position:relative;overflow:hidden;transition:.3s}
+  .scene:hover{background:var(--white);transform:translateY(-3px);box-shadow:0 20px 40px -34px rgba(20,33,28,.4)}
+  .scene-no{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted)}
+  .scene h3{font-family:var(--serif);font-size:24px;font-weight:600;margin:16px 0 10px;letter-spacing:.02em}
+  .scene p{font-size:13.5px;line-height:1.85;color:var(--muted)}
+  .scene .tagline{margin-top:18px;display:inline-flex;font-size:11.5px;color:var(--green);border-top:1px solid rgba(30,107,87,.25);padding-top:10px;letter-spacing:.02em}
+
+  /* limits */
+  .limits{background:var(--paper-2)}
+  .limit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid rgba(20,33,28,.16)}
+  .limit{padding:32px 30px 8px;border-bottom:1px solid rgba(20,33,28,.16)}
+  .limit + .limit{border-left:1px solid rgba(20,33,28,.16)}
+  .limit .x{font-family:var(--mono);font-size:11px;color:var(--coral);letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+  .limit .x::before{content:"";width:14px;height:1px;background:var(--coral)}
+  .limit h3{font-size:17px;font-weight:600;margin:16px 0 10px}
+  .limit p{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
+  .limit-quote{font-family:var(--serif);font-size:clamp(26px,3vw,38px);line-height:1.5;text-align:center;margin-top:72px;color:var(--ink)}
+  .limit-quote span{color:var(--green);border-bottom:1px solid rgba(30,107,87,.4);padding-bottom:2px}
+
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:10px;border-top:1px solid var(--line)}
+  .road-item{padding:30px 26px 6px;position:relative;border-bottom:1px solid var(--line)}
+  .road-item + .road-item{border-left:1px solid var(--line)}
+  .road-item::before{content:"";position:absolute;top:-4.5px;left:26px;width:8px;height:8px;border-radius:50%;background:var(--paper);border:1px solid rgba(20,33,28,.35)}
+  .road-item.now::before{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(30,107,87,.12)}
+  .road-item .ph{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+  .road-item.now .ph{color:var(--green)}
+  .road-item h3{font-size:15.5px;font-weight:600;margin:14px 0 8px}
+  .road-item p{font-size:12.8px;line-height:1.8;color:var(--muted)}
+  .road-item .st{display:inline-block;margin-top:16px;font-size:10.5px;font-family:var(--mono);letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:3px 7px}
+  .road-item.now .st{color:var(--green);border-color:rgba(30,107,87,.3)}
+
+  /* footer */
+  footer{background:var(--dark);color:var(--dark-text);padding:76px 0 34px;margin-top:0}
+  .foot-top{display:grid;grid-template-columns:1.2fr .8fr;gap:56px;padding-bottom:52px;border-bottom:1px solid var(--dark-line)}
+  .foot-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .foot-brand .brand-mark{background:rgba(255,255,255,.08);width:40px;height:40px;border-radius:11px}
+  .foot-brand .brand-name{font-size:26px}
+  .foot-brand .brand-sub{color:var(--dark-muted)}
+  .foot-lead{font-family:var(--serif);font-size:clamp(20px,2.2vw,26px);line-height:1.7;max-width:24em;color:var(--dark-text)}
+  .foot-lead span{color:var(--mint-2)}
+  .foot-links{display:flex;gap:56px;justify-content:flex-end}
+  .foot-col h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--dark-muted);text-transform:uppercase;margin-bottom:14px;font-weight:400}
+  .foot-col a,.foot-col p{display:block;font-size:12.8px;color:rgba(239,233,220,.72);margin-bottom:9px;transition:color .2s}
+  .foot-col a:hover{color:var(--mint-2)}
+  .foot-bottom{display:flex;justify-content:space-between;gap:24px;padding-top:26px;flex-wrap:wrap}
+  .disclaimer{font-size:11.5px;line-height:1.8;color:var(--dark-muted);max-width:62em}
+  .disclaimer b{color:rgba(239,233,220,.8);font-weight:500}
+  .copyright{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dark-muted);white-space:nowrap}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+  .reveal.in{opacity:1;transform:none}
+  .d1{transition-delay:.06s}.d2{transition-delay:.12s}.d3{transition-delay:.18s}
+
+  @media (max-width:1020px){
+    .hero-grid{grid-template-columns:1fr;gap:52px}
+    .hero{padding-top:140px}
+    .monitor{max-width:560px}
+    .demo-body{grid-template-columns:1fr;gap:28px}
+    .steps{grid-template-columns:repeat(2,1fr)}
+    .step:nth-child(3){border-left:none}
+    .step:nth-child(3),.step:nth-child(4){border-top:1px solid var(--line)}
+    .road{grid-template-columns:repeat(2,1fr)}
+    .road-item:nth-child(3){border-left:none}
+    .road-item:nth-child(3),.road-item:nth-child(4){border-top:1px solid var(--line)}
+    .problem-foot{grid-template-columns:1fr;gap:32px}
+    .foot-top{grid-template-columns:1fr;gap:40px}
+    .foot-links{justify-content:flex-start}
+  }
+  @media (max-width:820px){
+    .wrap,.nav-in{width:calc(100% - 48px)}
+    .nav-links{display:none}
+    .nav-tag{font-size:9.5px;padding:5px 9px}
+    .sec{padding:82px 0}
+    .cards-3,.scene-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr}
+    .stat + .stat{border-left:none}
+    .stat{padding:26px 0}
+    .stat-n{margin-top:0}
+    .limit-grid{grid-template-columns:1fr}
+    .limit + .limit{border-left:none}
+    .limit{padding:28px 0 6px}
+    .hero-meta{gap:16px}
+    .demo-panel{padding:26px 22px 24px;border-radius:20px}
+    .demo-top{flex-direction:column;align-items:flex-start;gap:14px}
+    .idea-strip{padding:24px;flex-direction:column;align-items:flex-start;gap:18px}
+    .tech-note{grid-template-columns:1fr;gap:12px}
+    .demo-foot{gap:18px}
+    .clock b{font-size:23px}
+    .foot-bottom{flex-direction:column}
+
+    .nav-tag{display:none}
+    .cmp{grid-template-columns:1fr}
+    .privacy-foot{grid-template-columns:1fr;gap:26px;margin-top:44px;padding-top:30px}
+    .p-chips{justify-content:flex-start}
+    .seg-row{gap:10px}
+
+    .policy-wrap{overflow:visible;border:0;border-radius:0;background:transparent}
+    table.policy{min-width:0;display:block}
+    table.policy thead{display:none}
+    table.policy tbody{display:block}
+    table.policy tr{display:block;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px 20px 16px;margin-bottom:10px}
+    table.policy tr:hover td{background:transparent}
+    table.policy td{display:block;border:0;padding:0}
+    table.policy td:first-child{margin-bottom:8px;font-size:11px;letter-spacing:.1em}
+    table.policy td b{font-size:15px}
+    table.policy td:nth-child(3){margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+    table.policy td:nth-child(3)::before{content:"可取消 · ";font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--green)}
+    html[lang="en"] table.policy td:nth-child(3)::before{content:"Can stop it · "}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none;transition:none}
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important}
+  }
+
+  /* ---------- language typography ---------- */
+  html[lang="en"] .hero h1{font-size:clamp(38px,4.6vw,66px);line-height:1.1;letter-spacing:-.012em}
+  html[lang="en"] .sec-head h2{font-size:clamp(28px,3.4vw,44px);line-height:1.18;letter-spacing:-.01em}
+  html[lang="en"] .hero-lead{max-width:32em}
+  html[lang="en"] .nav-links{gap:26px}
+  html[lang="en"] .limit-quote{font-size:clamp(21px,2.4vw,32px)}
+  html[lang="en"] .privacy-quote{font-size:clamp(19px,2.2vw,28px)}
+  html[lang="en"] .foot-lead{font-size:clamp(21px,2.3vw,30px)}
+  html[lang="en"] .brand-sub{letter-spacing:.12em}
+  @media (max-width:1180px){ .nav-tag{display:none} }
+  @media (max-width:1060px){ html[lang="en"] .nav-links{gap:18px} }
+  @media (max-width:980px){ html[lang="en"] .nav-links{display:none} }
+  @media (max-width:820px){ .eyebrow{font-size:9.5px;letter-spacing:.1em} .seg-note{font-size:9.5px;letter-spacing:.05em} }
+  @media (max-width:640px){ .hero-lead{font-size:15px;line-height:1.85} }
+
+  /* feasibility */
+  .feasible{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .proof{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:52px}
+  .proof-card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;box-shadow:0 1px 0 rgba(20,33,28,.02)}
+  .proof-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--green)}
+  .proof-card h3{font-family:var(--serif);font-size:21px;font-weight:600;margin:10px 0 14px;letter-spacing:.02em}
+  .proof-card ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .proof-card li{font-size:13.5px;line-height:1.75;color:var(--ink-2);padding-left:14px;position:relative}
+  .proof-card li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--mint-2)}
+  .proof-card b{font-weight:600;color:var(--ink)}
+  .truth{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .truth-col{border:1px dashed rgba(20,33,28,.22);border-radius:18px;padding:22px 24px;background:rgba(255,253,248,.55)}
+  .truth-col .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--coral);display:block;margin-bottom:8px}
+  .truth-col p{font-size:13.5px;line-height:1.8;color:var(--ink-2)}
+  .truth-col b{font-weight:700;color:var(--ink)}
+  .src{margin-top:22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;line-height:1.9;color:var(--muted)}
+  @media (max-width:980px){ .proof{grid-template-columns:1fr} .truth{grid-template-columns:1fr} }
+
+  /* evidence */
+  .evid{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .evid-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .ev-card{background:var(--dark);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:18px 20px 16px;color:var(--dark-text);font-family:var(--mono);font-size:12px;line-height:1.75;overflow:hidden}
+  .ev-card.bad{border-color:rgba(232,132,92,.4)}
+  .ev-bar{display:flex;justify-content:space-between;gap:12px;font-size:9.5px;letter-spacing:.1em;color:var(--dark-muted);margin-bottom:14px}
+  .ev-card pre{margin:0;white-space:pre-wrap;word-break:break-word;font:inherit;color:#D9E5DD}
+  .ev-card .k{color:var(--mint-2)}
+  .ev-card .c{color:#7E948A}
+  .ev-card .r{color:#E8845C}
+  .ev-card .b{color:#F3EDE0}
+  .ev-card a{display:inline-block;margin-top:14px;font-size:10px;letter-spacing:.02em;color:var(--dark-muted);text-decoration:none;border-bottom:1px dotted rgba(239,233,220,.22);padding-bottom:2px}
+  .ev-note{margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.8}
+  .lim-row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;border-top:1px solid var(--line);padding-top:22px;list-style:none}
+  .lim-row b{display:block;font-size:15px;font-weight:600;margin-bottom:4px}
+  .lim-row span{font-size:13px;color:var(--muted);line-height:1.7}
+  @media (max-width:820px){ .evid-grid{grid-template-columns:1fr} .lim-row{grid-template-columns:1fr;gap:16px} }
+
+  /* small life */
+  .vscene-door .door{animation:doorKnock 1.7s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes doorKnock{0%,100%{transform:translateX(0)}9%{transform:translateX(-1.6px)}18%{transform:translateX(1.2px)}27%{transform:translateX(-.7px)}36%{transform:translateX(0)}}
+  .phone{animation:phonePulse 1.9s ease-in-out infinite}
+  @keyframes phonePulse{0%,100%{box-shadow:0 0 0 0 rgba(232,132,92,0)}55%{box-shadow:0 0 0 7px rgba(232,132,92,.09)}}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top" aria-label="无恙 首页">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#7FD3AE" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="18" r="1.6" fill="#7FD3AE" stroke="none"/>
+          <path d="M6.5 13.5a7.8 7.8 0 0 1 11 0M9.3 16.2a4.2 4.2 0 0 1 5.4 0"/>
+        </svg>
+      </span>
+      <span class="brand-txt">
+        <span class="brand-name">无恙</span>
+        <span class="brand-sub">WiFi 无感守护</span>
+      </span>
+    </a>
+    <div class="nav-links">
+      <a href="#demo">演示</a>
+      <a href="#privacy">判断</a>
+      <a href="#evid">依据</a>
+      <a href="#limits">边界</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang" id="lang" role="group" aria-label="语言 / Language">
+        <button type="button" data-lang="zh-Hans" class="on">简</button>
+        <button type="button" data-lang="zh-Hant">繁</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <span class="nav-tag">概念演示 · CONCEPT</span>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">AI in Healthcare · 居家守护构想</span>
+      <h1>不开摄像头，<br>也知道家人<br><span class="hl">是否安好</span>。</h1>
+      <p class="hero-lead">
+        跌倒是 65 岁以上老人伤害死亡的首位原因。<br>我们想用家里的 WiFi 信号，判断有没有人摔倒；先问一句，<strong class="nw">十秒没有回应</strong>，再叫家人。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#demo">
+          <span>看一次演示</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M8.5 4l4 4-4 4"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#privacy">为什么是 WiFi</a>
+      </div>
+      <div class="hero-meta">
+        <span><i></i>无需摄像头</span>
+        <span><i></i>无需穿戴</span>
+        <span><i></i>无需改造房屋</span>
+      </div>
+    </div>
+
+    <div class="monitor" aria-hidden="true">
+      <div class="monitor-head">
+        <span class="live"><i></i>LIVE</span>
+        <span class="mono">全屋 · 78 m²</span>
+      </div>
+      <div class="monitor-body">
+        <div class="fp">
+          <svg viewBox="0 0 520 186" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <g fill="none" stroke="rgba(239,233,220,.30)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 10H500V176H20Z"/>
+              <path d="M300 10V56M300 76V96"/>
+              <path d="M300 96H364M386 96H500"/>
+              <path d="M396 120H500M396 120V134M396 156V176"/>
+              <path d="M118 10V46M118 66V80"/>
+              <path d="M20 80H118"/>
+            </g>
+            <g fill="none" stroke="rgba(239,233,220,.2)" stroke-width="1.1" stroke-linecap="round">
+              <rect x="314" y="18" width="104" height="56" rx="4"/>
+              <path d="M322 27H356M314 58H418"/>
+              <rect x="438" y="22" width="26" height="16" rx="2"/>
+              <rect x="34" y="120" width="94" height="38" rx="5"/>
+              <path d="M34 130H128M66 120V158M96 120V158"/>
+              <circle cx="196" cy="140" r="17"/>
+              <rect x="26" y="16" width="76" height="14" rx="2"/>
+              <circle cx="42" cy="23" r="4"/>
+              <rect x="424" y="132" width="42" height="30" rx="7"/>
+              <rect x="431" y="138" width="28" height="18" rx="4"/>
+            </g>
+            <g stroke="#7FD3AE" fill="none">
+              <circle cx="196" cy="104" r="16" opacity=".30"/>
+              <circle cx="196" cy="104" r="32" opacity=".16"/>
+              <circle cx="196" cy="104" r="50" opacity=".08"/>
+            </g>
+            <g fill="#7FD3AE">
+              <rect x="189" y="99" width="14" height="10" rx="2.5"/>
+              <path d="M192 96v-5M200 96v-6" stroke="#7FD3AE" stroke-width="1.4" stroke-linecap="round"/>
+            </g>
+            <circle class="fp-person" cx="262" cy="150" r="3.4" fill="#7FD3AE"/>
+          </svg>
+          <span class="fp-glow"></span>
+          <div class="fp-sweep"></div>
+        </div>
+      </div>
+      <div class="monitor-foot">
+        <div><span class="k">状态</span><span class="v">站立 · 静止</span></div>
+        <div><span class="k">信号</span><span class="v">良好</span></div>
+        <div><span class="k">延迟</span><span class="v mono">0.3s</span></div>
+      </div>
+      <p class="monitor-note">WiFi 信号穿过墙壁。<em>人在哪、站还是躺，它都能感觉到。</em></p>
+    </div>
+  </div>
+</header>
+
+
+
+<!-- demo -->
+<section class="sec demo-sec" id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">演示</span>
+      <h2>一次跌倒，接下来会发生什么。</h2>
+      <p class="lede">这是模拟。但每一步，都是我们打算真做出来的。</p>
+    </div>
+
+    <div class="demo-panel reveal">
+      <div class="stage" id="stage">
+        <canvas id="stageCanvas"></canvas>
+        <div class="hud">
+          <div class="hud-room">SENSING · 客厅</div>
+          <div class="hud-state" id="stChip"><i></i><span>监测中</span></div>
+        </div>
+
+        <div class="phone" id="phone">
+          <div class="phone-row">
+            <div class="pi"><svg viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5z"/></svg></div>
+            <div><b id="phName">女儿</b><span id="phState">正在呼叫…</span></div>
+            <div class="bar"><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="vscene vscene-door" id="doorScene">
+          <svg viewBox="0 0 240 200" aria-hidden="true">
+            <rect x="94" y="172" width="72" height="3" fill="rgba(255,226,176,.16)"/>
+            <g class="door">
+            <rect x="86" y="26" width="88" height="152" rx="3" fill="none" stroke="rgba(239,233,220,.45)" stroke-width="2"/>
+            <rect x="94" y="34" width="72" height="136" rx="2" fill="none" stroke="rgba(239,233,220,.22)" stroke-width="1.5"/>
+            <circle cx="154" cy="104" r="2.6" fill="rgba(239,233,220,.5)"/>
+            </g>
+            <path class="knock" d="M66 80a26 26 0 0 0 0 44" fill="none" stroke="rgba(127,211,174,.8)" stroke-width="2" stroke-linecap="round"/>
+            <path class="knock" d="M52 72a38 38 0 0 0 0 60" fill="none" stroke="rgba(127,211,174,.6)" stroke-width="2" stroke-linecap="round"/>
+            <path class="knock" d="M38 64a50 50 0 0 0 0 76" fill="none" stroke="rgba(127,211,174,.35)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="vscene vscene-ems" id="emsScene">
+          <svg viewBox="0 0 420 250" aria-hidden="true">
+            <defs>
+              <linearGradient id="hall" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#FFE8C0" stop-opacity=".95"/>
+                <stop offset="1" stop-color="#D89A52" stop-opacity=".5"/>
+              </linearGradient>
+              <linearGradient id="spill" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#FFD79A" stop-opacity=".3"/>
+                <stop offset="1" stop-color="#FFD79A" stop-opacity="0"/>
+              </linearGradient>
+              <radialGradient id="hallGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="#FFE8C0" stop-opacity=".3"/>
+                <stop offset="1" stop-color="#FFE8C0" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="wallG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#0a1411"/>
+                <stop offset="1" stop-color="#0d1915"/>
+              </linearGradient>
+            </defs>
+
+            <path d="M18 214h386" stroke="rgba(239,233,220,.14)" stroke-width="1.2"/>
+            <ellipse cx="262" cy="212" rx="118" ry="9" fill="rgba(0,0,0,.4)"/>
+            <text x="146" y="62" font-family="ui-monospace,monospace" font-size="9" letter-spacing="1.5" fill="rgba(239,233,220,.42)">1203</text>
+            <ellipse cx="96" cy="150" rx="110" ry="120" fill="url(#hallGlow)"/>
+            <rect x="48" y="30" width="80" height="186" fill="url(#hall)"/>
+            <polygon points="128,70 420,152 420,226 128,216" fill="url(#spill)"/>
+            <rect x="42" y="24" width="92" height="192" fill="none" stroke="rgba(239,233,220,.42)" stroke-width="2"/>
+            <path d="M50 206h76" stroke="rgba(255,214,150,.75)" stroke-width="2" stroke-linecap="round"/>
+
+            <!-- stretcher -->
+            <g fill="#08110D">
+              <rect x="176" y="152" width="164" height="8" rx="4"/>
+              <path d="M200 160v40M316 160v40" stroke="#08110D" stroke-width="5"/>
+              <circle cx="200" cy="206" r="6"/>
+              <circle cx="316" cy="206" r="6"/>
+              <rect x="184" y="142" width="148" height="11" rx="5" fill="#0e1a15" stroke="rgba(239,233,220,.16)" stroke-width="1"/>
+              <path d="M190 143q20-15 44-4q24 11 46-2q16-8 32 2v11h-122z"/>
+              <circle cx="197" cy="136" r="7"/>
+            </g>
+            <path d="M212 138q18-8 34 0" stroke="rgba(239,233,220,.3)" fill="none" stroke-width="1.4" stroke-linecap="round"/>
+
+            <!-- push bar + paramedic -->
+            <g fill="#08110D">
+              <rect x="338" y="146" width="18" height="7" rx="3.5"/>
+              <circle cx="370" cy="94" r="11"/>
+              <rect x="356" y="106" width="30" height="56" rx="14"/>
+              <path d="M362 120l-16 26" stroke="#08110D" stroke-width="9" stroke-linecap="round"/>
+              <path d="M362 160l-4 46M376 160l6 46" stroke="#08110D" stroke-width="10" stroke-linecap="round"/>
+            </g>
+
+            <!-- medical bag on the stretcher -->
+            <g>
+              <rect x="300" y="158" width="22" height="15" rx="3.5" fill="#0c1511" stroke="rgba(239,233,220,.3)" stroke-width="1"/>
+              <path d="M311 161v9M306.5 165.5h9" stroke="#E8845C" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="sub"><p id="subLine">23:41，客厅。</p></div>
+      </div>
+
+      <div class="demo-bar">
+        <button class="d-play" id="playBtn"><svg viewBox="0 0 12 12"><path d="M2 1.5l8 4.5-8 4.5z"/></svg><span>播放演示</span></button>
+        <button class="d-reset" id="resetBtn">重置</button>
+        <div class="d-prog"><i id="prog"></i></div>
+        <button class="d-ans" id="cancelBtn" disabled>本人应答</button>
+      </div>
+      <p class="demo-note">为演示加速：真实响应链约 50 秒。</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- 03 privacy -->
+<section class="sec privacy" id="privacy">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">判断</span>
+      <h2>为什么不是摄像头，<br>也不是手环。</h2>
+      <p class="lede">浴室和卧室是跌倒最多的地方，也是这两样东西最不好用的地方。<br>对失能、失智、术后的人来说，被一直看着，本身就是一种压力。</p>
+    </div>
+
+    <div class="privacy-demo reveal" data-scene="bath" id="cmp">
+      <div class="seg-row">
+        <div class="seg" role="tablist" aria-label="切换场景">
+          <button type="button" class="seg-btn on" data-scene="bath" role="tab" aria-selected="true">浴室</button>
+          <button type="button" class="seg-btn" data-scene="living" role="tab" aria-selected="false">客厅</button>
+        </div>
+        <span class="seg-note">同一分钟，三种设备各自看到什么</span>
+      </div>
+
+      <div class="cmp">
+        <article class="cmp-card" data-v="no">
+          <div class="cmp-head">
+            <span class="cmp-name">摄像头</span>
+            <span class="verdict v-no v-bath">✕ 浴室不可用</span>
+            <span class="verdict v-yes v-living">✓ 客厅可用</span>
+          </div>
+          <div class="cmp-art art-cam">
+            <svg viewBox="0 0 120 80" fill="none" aria-hidden="true">
+              <g class="ico" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <rect x="30" y="27" width="44" height="29" rx="6"/>
+                <path d="M74 37l14-7v21l-14-7"/>
+                <circle cx="48" cy="41.5" r="6.5"/>
+              </g>
+              <circle class="rec" cx="66" cy="35" r="2.6" fill="#1E6B57"/>
+              <path class="slash" d="M24 16L97 65" stroke="#C0503A" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="cmp-body">
+            <div class="cmp-state s-bath">
+              <h4>不能装，也不该装</h4>
+              <p>没有哪个家庭愿意把浴室里的画面交出去，照护机构更不会承担这个风险。</p>
+            </div>
+            <div class="cmp-state s-living">
+              <h4>能看见，但只在客厅</h4>
+              <p>画面依然存在，也依然需要被拍摄的人点头同意。</p>
+            </div>
+          </div>
+          <span class="cmp-tag">需要被拍摄者同意</span>
+        </article>
+
+        <article class="cmp-card" data-v="no">
+          <div class="cmp-head">
+            <span class="cmp-name">手环</span>
+            <span class="verdict v-no v-bath">✕ 洗澡时会摘下</span>
+            <span class="verdict v-yes v-living">✓ 戴着时有效</span>
+          </div>
+          <div class="cmp-art art-watch">
+            <svg viewBox="0 0 120 80" fill="none" aria-hidden="true">
+              <g class="ico" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <rect x="46" y="24" width="28" height="34" rx="9"/>
+                <path d="M52 24v-9h16v9M52 58v9h16v-9"/>
+                <path d="M60 36v6l4 2.5" stroke-linecap="round"/>
+              </g>
+              <path class="slash" d="M28 14L94 69" stroke="#C0503A" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="cmp-body">
+            <div class="cmp-state s-bath">
+              <h4>摘下来，就是一段盲区</h4>
+              <p>防水不等于愿意戴。充电、皮肤不适、忘记戴——任何一次摘下，都可能刚好是出事的那几分钟。</p>
+            </div>
+            <div class="cmp-state s-living">
+              <h4>戴着的时候才有效</h4>
+              <p>前提是记得戴、记得充电、愿意一直戴。</p>
+            </div>
+          </div>
+          <span class="cmp-tag">需要每天佩戴</span>
+        </article>
+
+        <article class="cmp-card" data-v="yes">
+          <div class="cmp-head">
+            <span class="cmp-name">WiFi</span>
+            <span class="verdict v-yes v-bath">✓ 隔墙仍在工作</span>
+            <span class="verdict v-yes v-living">✓ 本来就在工作</span>
+          </div>
+          <div class="cmp-art art-wifi">
+            <svg viewBox="0 0 120 80" fill="none" aria-hidden="true">
+              <path class="wall" d="M40 8v64" stroke="rgba(20,33,28,.28)" stroke-width="1.4" stroke-dasharray="3 5"/>
+              <g class="node" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <rect x="13" y="30" width="18" height="13" rx="3"/>
+                <path d="M22 30v-5"/>
+                <circle cx="22" cy="23" r="1.6" fill="currentColor" stroke="none"/>
+              </g>
+              <g class="waves" stroke="#1E6B57" stroke-width="1.6" stroke-linecap="round">
+                <path class="wave" d="M50 31q7 9 0 18"/>
+                <path class="wave" d="M57 25q11 15 0 30"/>
+                <path class="wave" d="M64 19q15 21 0 42"/>
+              </g>
+              <g class="person" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="93" cy="35" r="4"/>
+                <path d="M93 39v10M93 43l-6 6M93 43l6 6M93 49l-5 9M93 49l5 9"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cmp-body">
+            <div class="cmp-state s-bath">
+              <h4>不需要你配合</h4>
+              <p>不采集图像，不记录声音，只读取信号被身体扰动的变化——在浴室里也一样。</p>
+            </div>
+            <div class="cmp-state s-living">
+              <h4>一样在工作</h4>
+              <p>它本来就不需要你配合。</p>
+            </div>
+          </div>
+          <span class="cmp-tag">无需佩戴 · 无需配合</span>
+        </article>
+      </div>
+
+      <p class="cmp-caption">
+        <span class="c-bath">跌倒最高发的地方，恰好是另外两种设备最无能为力的地方。</span>
+        <span class="c-living">客厅里三种方案都能用。真正拉开差距的，是那扇关上的门。</span>
+      </p>
+    </div>
+
+    <div class="privacy-foot reveal">
+      <p class="privacy-quote">装摄像头这件事，<br>很多老人嘴上答应，心里是介意的。</p>
+      <div class="p-chips">
+        <span>不采集图像</span>
+        <span>不记录声音</span>
+        <span>数据留在家中</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 evidence -->
+<section class="sec evid" id="evid">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">依据</span>
+      <h2>这些不是我们说的。</h2>
+      <p class="lede">论文、代码、数据都在下面，你可以自己去查。</p>
+    </div>
+
+    <div class="evid-grid reveal">
+      <article class="ev-card">
+        <div class="ev-bar"><span>PAPER · arXiv 2026</span><span>2611.15532</span></div>
+        <pre>two ESP32 · 3.5 m apart
+
+<span class="k">accuracy</span>    93.10 %
+<span class="k">precision</span>  100.00 %
+<span class="k">recall</span>      87.50 %
+<span class="k">f1</span>          93.33 %</pre>
+        <a href="https://arxiv.org/abs/2611.15532" target="_blank" rel="noopener">arxiv.org/abs/2611.15532</a>
+      </article>
+
+      <article class="ev-card">
+        <div class="ev-bar"><span>REPO · GitHub</span><span>★ 13</span></div>
+        <pre><span class="b">Toandinh1/HPE-Li-ECCV2024</span>
+<span class="c">PyTorch · 49 files</span>
+
+att_mmfi.py
+att_wipose.py
+denoiser_training.py
+train_pose.py</pre>
+        <a href="https://github.com/Toandinh1/HPE-Li-ECCV2024" target="_blank" rel="noopener">github.com/Toandinh1/HPE-Li-ECCV2024</a>
+      </article>
+
+      <article class="ev-card">
+        <div class="ev-bar"><span>DATASET · NeurIPS 2023</span><span>MM-Fi</span></div>
+        <pre><span class="k">subjects</span>  40
+<span class="k">actions</span>   27
+<span class="k">frames</span>    320 k+
+<span class="c">WiFi CSI + RGB + depth + LiDAR</span></pre>
+        <a href="https://github.com/ybhbingo/MMFi_dataset" target="_blank" rel="noopener">github.com/ybhbingo/MMFi_dataset</a>
+      </article>
+
+      <article class="ev-card bad">
+        <div class="ev-bar"><span>COUNTEREXAMPLE</span><span>★ 104 k</span></div>
+        <pre><span class="b">ruvnet/RuView</span>
+<span class="r">def csi_extractor(frames):</span>
+<span class="r">    return np.random.rand(56, 3)</span>
+<span class="c"># no weights · no evaluation</span></pre>
+        <a href="https://github.com/ruvnet/RuView" target="_blank" rel="noopener">github.com/ruvnet/RuView</a>
+      </article>
+    </div>
+
+    <p class="ev-note reveal">星数不等于可信。最后一张是十万星的反例，前两张才是有论文、有代码的那种。</p>
+  </div>
+</section>
+
+<!-- 06 limits -->
+<section class="sec limits" id="limits">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">没做到的</span>
+      <h2>做不到的，<br>也写在这。</h2>
+    </div>
+    <ul class="lim-row reveal">
+      <li><b>只能一个人</b><span>两个人在动，信号会混。</span></li>
+      <li><b>只能一个家</b><span>换房间，要重新学几天。</span></li>
+      <li><b>不做诊断</b><span>只发现、只通知。</span></li>
+    </ul>
+  </div>
+</section>
+
+
+
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7FD3AE" stroke-width="1.8" stroke-linecap="round">
+              <circle cx="12" cy="18" r="1.6" fill="#7FD3AE" stroke="none"/>
+              <path d="M6.5 13.5a7.8 7.8 0 0 1 11 0M9.3 16.2a4.2 4.2 0 0 1 5.4 0"/>
+            </svg>
+          </span>
+          <span class="brand-txt">
+            <span class="brand-name">无恙</span>
+            <span class="brand-sub">WiFi 无感守护</span>
+          </span>
+        </div>
+        <p class="foot-lead">让每一个独自在家的人，<br>都被<span>安静地知道</span>。</p>
+      </div>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h4>页面</h4>
+          <a href="#demo">演示</a>
+          <a href="#privacy">判断</a>
+          <a href="#evid">依据</a>
+          <a href="#limits">边界</a>
+        </div>
+        <div class="foot-col">
+          <h4>项目</h4>
+          <p>AI in Healthcare</p>
+          <p>课程概念项目</p>
+          <p>2026 · 小组作业</p>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p class="disclaimer">
+        <b>本页面为概念演示。</b>不包含真实设备、真实模型、真实呼叫，也不构成任何医疗建议。页面中的时间线、置信度与响应策略均为设计示意。
+      </p>
+      <span class="copyright">© 2026 无恙 · CONCEPT</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+var I18N={"zh-Hans": {}, "zh-Hant": {"<span class=\"brand-name\">无恙</span> <span class=\"brand-sub\">WiFi 无感守护</span>": "<span class=\"brand-name\">無恙</span> <span class=\"brand-sub\">WiFi 無感守護</span>", "演示": "演示", "概念演示 · CONCEPT": "概念演示 · CONCEPT", "AI in Healthcare · 居家守护构想": "AI in Healthcare · 居家守護構想", "不开摄像头，<br>也知道家人<br><span class=\"hl\">是否安好</span>。": "不開攝像頭，<br>也知道家人<br><span class=\"hl\">是否安好</span>。", "为什么是 WiFi": "爲什麼是 WiFi", "<i></i>无需摄像头": "<i></i>無需攝像頭", "<i></i>无需穿戴": "<i></i>無需穿戴", "<i></i>无需改造房屋": "<i></i>無需改造房屋", "客厅 · 3.2 × 4.0 m": "客廳 · 3.2 × 4.0 m", "状态": "狀態", "站立 · 静止": "站立 · 靜止", "信号": "信號", "良好": "良好", "延迟": "延遲", "人体会扰动 WiFi 信号。<em>姿态改变，波形随之改变。</em>": "人體會擾動 WiFi 信號。<em>姿態改變，波形隨之改變。</em>", "一次跌倒，<span class=\"nw\">72 秒里会发生什么。</span>": "一次跌倒，<span class=\"nw\">72 秒裡會發生什麼。</span>", "响应链路模拟": "響應鏈路模擬", "8× 速度": "8× 速度", "播放演示": "播放演示", "重置": "重置", "WiFi · 5.8 GHz": "WiFi · 5.8 GHz", "信号波形": "信號波形", "检测": "檢測", "姿态突变：站立 → 卧倒": "姿態突變：站立 → 臥倒", "信号在 0.8 秒内剧烈变化，置信度 0.93。现场响起提示音。": "信號在 0.8 秒內劇烈變化，置信度 0.93。現場響起提示音。", "询问": "詢問", "先问一句：您还好吗？": "先問一句：您還好嗎？", "本地语音询问，等待 10 秒。这 10 秒，是留给本人的机会。": "本地語音詢問，等待 10 秒。這 10 秒，是留給本人的機會。", "通知": "通知", "没有回应，呼叫家属": "沒有回應，呼叫家屬", "App 推送 + 电话呼叫，附上现场状态摘要，而不是一段冰冷的报警。": "App 推送 + 電話呼叫，附上現場狀態摘要，而不是一段冰冷的報警。", "升级": "升級", "家属未接，转第二联系人": "家屬未接，轉第二聯繫人", "继续呼叫备用联系人，或接入社区养老平台的值班坐席。": "繼續呼叫備用聯繫人，或接入社區養老平臺的值班坐席。", "急救": "急救", "人工确认后，协助呼叫急救": "人工確認後，協助呼叫急救", "由坐席确认情况，再协助拨打 120——最后一跳，必须有人。": "由坐席確認情況，再協助撥打 120——最後一跳，必須有人。", "模拟时间": "模擬時間", "模拟本人应答「我没事」": "模擬本人應答「我沒事」", "提示：播放过程中随时点击 <b>「本人应答」</b>，看看升级链如何被取消——误报不该惊动任何人。": "提示：播放過程中隨時點擊 <b>「本人應答」</b>，看看升級鏈如何被取消——誤報不該驚動任何人。", "浴室": "浴室", "客厅": "客廳", "同一分钟，三种设备各自看到什么": "同一分鐘，三種設備各自看到什麼", "摄像头": "攝像頭", "✕ 浴室不可用": "✕ 浴室不可用", "✓ 客厅可用": "✓ 客廳可用", "不能装，也不该装": "不能裝，也不該裝", "没有哪个家庭愿意把浴室里的画面交出去，照护机构更不会承担这个风险。": "沒有哪個家庭願意把浴室裡的畫面交出去，照護機構更不會承擔這個風險。", "能看见，但只在客厅": "能看見，但只在客廳", "画面依然存在，也依然需要被拍摄的人点头同意。": "畫面依然存在，也依然需要被拍攝的人點頭同意。", "需要被拍摄者同意": "需要被拍攝者同意", "手环": "手環", "✕ 洗澡时会摘下": "✕ 洗澡時會摘下", "✓ 戴着时有效": "✓ 戴著時有效", "摘下来，就是一段盲区": "摘下來，就是一段盲區", "防水不等于愿意戴。充电、皮肤不适、忘记戴——任何一次摘下，都可能刚好是出事的那几分钟。": "防水不等於願意戴。充電、皮膚不適、忘記戴——任何一次摘下，都可能剛好是出事的那幾分鐘。", "戴着的时候才有效": "戴著的時候才有效", "前提是记得戴、记得充电、愿意一直戴。": "前提是記得戴、記得充電、願意一直戴。", "需要每天佩戴": "需要每天佩戴", "✓ 隔墙仍在工作": "✓ 隔牆仍在工作", "✓ 本来就在工作": "✓ 本來就在工作", "不需要你配合": "不需要你配合", "不采集图像，不记录声音，只读取信号被身体扰动的变化——在浴室里也一样。": "不採集圖像，不記錄聲音，只讀取信號被身體擾動的變化——在浴室裡也一樣。", "一样在工作": "一樣在工作", "它本来就不需要你配合。": "它本來就不需要你配合。", "无需佩戴 · 无需配合": "無需佩戴 · 無需配合", "<span class=\"c-bath\">跌倒最高发的地方，恰好是另外两种设备最无能为力的地方。</span> <span class=\"c-living\">客厅里三种方案都能用。真正拉开差距的，是那扇关上的门。</span>": "<span class=\"c-bath\">跌倒最高發的地方，恰好是另外兩種設備最無能爲力的地方。</span> <span class=\"c-living\">客廳裡三種方案都能用。真正拉開差距的，是那扇關上的門。</span>", "<span>不采集图像</span> <span>不记录声音</span> <span>数据留在家中</span>": "<span>不採集圖像</span> <span>不記錄聲音</span> <span>數據留在家中</span>", "发射": "發射", "家里的 WiFi 一直在工作。看不见，但铺满整个房间。": "家裡的 WiFi 一直在工作。看不見，但鋪滿整個房間。", "扰动": "擾動", "呼吸、走动、突然倒下，都会改变电波的反射路径。": "呼吸、走動、突然倒下，都會改變電波的反射路徑。", "解读": "解讀", "盒子把这种变化读成三种状态：没人在、有人在动、有人倒下。": "盒子把這種變化讀成三種狀態：沒人在、有人在動、有人倒下。", "响应": "響應", "时间": "時間", "系统动作": "系統動作", "谁可以取消": "誰可以取消", "<b>检测到姿态突变</b><span>现场提示音，本地记录一段信号片段</span>": "<b>檢測到姿態突變</b><span>現場提示音，本地記錄一段信號片段</span>", "本人起身，或语音说「我没事」": "本人起身，或語音說「我沒事」", "<b>本地语音询问</b><span>「您还好吗？需要帮忙请回答。」等待 10 秒</span>": "<b>本地語音詢問</b><span>「您還好嗎？需要幫忙請回答。」等待 10 秒</span>", "本人任何一句应答": "本人任何一句應答", "<b>通知家属</b><span>App 推送、电话呼叫，附现场状态摘要</span>": "<b>通知家屬</b><span>App 推送、電話呼叫，附現場狀態摘要</span>", "家属在 App 内确认「已联系，无需升级」": "家屬在 App 內確認「已聯繫，無需升級」", "<b>升级到第二联系人</b><span>备用联系人，或社区养老平台值班坐席</span>": "<b>升級到第二聯繫人</b><span>備用聯繫人，或社區養老平臺值班坐席</span>", "家属或平台坐席": "家屬或平臺坐席", "<b>人工确认后呼叫急救</b><span>坐席核实情况，协助拨打 120</span>": "<b>人工確認後呼叫急救</b><span>坐席覈實情況，協助撥打 120</span>", "已进入人工流程，不再自动取消": "已進入人工流程，不再自動取消", "自动直拨 110 / 120 在合规与误报责任上都走不通，所以最后一跳始终由人完成。我们相信，这不会削弱它，反而让它更值得被信任。": "自動直撥 110 / 120 在合規與誤報責任上都走不通，所以最後一跳始終由人完成。我們相信，這不會削弱它，反而讓它更值得被信任。", "01 / 研究": "01 / 研究", "论文里已经做到": "論文裡已經做到", "<b>MM-Fi</b>（NeurIPS 2023）：40 人、27 种动作、32 万帧的 WiFi 与视觉配对数据集。": "<b>MM-Fi</b>（NeurIPS 2023）：40 人、27 種動作、32 萬幀的 WiFi 與視覺配對數據集。", "<b>Person-in-WiFi-3D</b>（CVPR 2024）：只用 WiFi 重建三维人体，单人误差 91.7 mm。": "<b>Person-in-WiFi-3D</b>（CVPR 2024）：只用 WiFi 重建三維人體，單人誤差 91.7 mm。", "<b>HPE-Li</b>（ECCV 2024）：换一个房间也能估计姿态，代码已开源。": "<b>HPE-Li</b>（ECCV 2024）：換一個房間也能估計姿態，代碼已開源。", "<b>跌倒检测</b>（arXiv 2026）：两块 ESP32、相距 3.5 米，93.1% 准确率、87.5% 召回率。": "<b>跌倒檢測</b>（arXiv 2026）：兩塊 ESP32、相距 3.5 米，93.1% 準確率、87.5% 召回率。", "02 / 开源": "02 / 開源", "代码是拿得到的": "代碼是拿得到的", "HPE-Li、DT-Pose、PerceptAlign、WiSPPN、VST-Pose 都带着论文和训练脚本。": "HPE-Li、DT-Pose、PerceptAlign、WiSPPN、VST-Pose 都帶著論文和訓練腳本。", "想从硬件做起：<b>csi-pose</b> 用六块 ESP32 做端到端姿态，<b>ESP32-CSI-Tool</b> 负责采原始数据。": "想從硬件做起：<b>csi-pose</b> 用六塊 ESP32 做端到端姿態，<b>ESP32-CSI-Tool</b> 負責採原始數據。", "数据集 MM-Fi、Wi-Pose 公开下载，不必从零开始采。": "數據集 MM-Fi、Wi-Pose 公開下載，不必從零開始採。", "03 / 硬件与标准": "03 / 硬件與標準", "成本比想象中低": "成本比想像中低", "两块 ESP32 开发板就能采到 CSI，百元级成本。": "兩塊 ESP32 開發板就能採到 CSI，百元級成本。", "普通家用路由器只提供 RSSI，不开放 CSI——所以感知要靠一个外挂的小盒子。": "普通家用路由器只提供 RSSI，不開放 CSI——所以感知要靠一個外掛的小盒子。", "IEEE 802.11bf-2025 已把「WLAN 感知」写进标准；也有路由器厂商做过运动感知产品。": "IEEE 802.11bf-2025 已把「WLAN 感知」寫進標準；也有路由器廠商做過運動感知產品。", "但是": "但是", "所以": "所以", "<b>星数不等于可信。</b>我们查过 GitHub 上星数最高的几个 WiFi 姿态项目：有的十万星，核心代码却是随机数，没有权重、没有评测。这里只引用带论文、带数据集、能复现的实现。": "<b>星數不等於可信。</b>我們查過 GitHub 上星數最高的幾個 WiFi 姿態項目：有的十萬星，核心代碼卻是隨機數，沒有權重、沒有評測。這裡只引用帶論文、帶數據集、能復現的實現。", "资料来源：NeurIPS 2023 MM-Fi · CVPR 2024 Person-in-WiFi-3D · ECCV 2024 HPE-Li · arXiv 2026 跌倒检测 · IEEE 802.11bf-2025 · GitHub 项目页（星数为 2026 年 11 月快照）。": "資料來源：NeurIPS 2023 MM-Fi · CVPR 2024 Person-in-WiFi-3D · ECCV 2024 HPE-Li · arXiv 2026 跌倒檢測 · IEEE 802.11bf-2025 · GitHub 項目頁（星數爲 2026 年 11 月快照）。", "只能应付单人": "只能應付單人", "家里同时有两个人在动，信号会混在一起。这是公开的难题，我们不打算在第一版里假装解决它。": "家裡同時有兩個人在動，信號會混在一起。這是公開的難題，我們不打算在第一版裡假裝解決它。", "只能守住熟悉的户型": "只能守住熟悉的戶型", "换一个房间、换一套家具，「信号指纹」就会变。它需要先在这个家里安静地学上几天。": "換一個房間、換一套傢俱，「信號指紋」就會變。它需要先在這個家裡安靜地學上幾天。", "不能替代医疗判断": "不能替代醫療判斷", "它只负责「发现异常、及时通知」，不做诊断，不判断病因，也不决定用药。": "它只負責「發現異常、及時通知」，不做診斷，不判斷病因，也不決定用藥。", "让每一个独自在家的人，<br>都被<span>安静地知道</span>。": "讓每一個獨自在家的人，<br>都被<span>安靜地知道</span>。", "页面": "頁面", "项目": "項目", "课程概念项目": "課程概念項目", "2026 · 小组作业": "2026 · 小組作業", "<b>本页面为概念演示。</b>不包含真实设备、真实模型、真实呼叫，也不构成任何医疗建议。页面中的时间线、置信度与响应策略均为设计示意。": "<b>本頁面爲概念演示。</b>不包含真實設備、真實模型、真實呼叫，也不構成任何醫療建議。頁面中的時間線、置信度與響應策略均爲設計示意。", "© 2026 无恙 · CONCEPT": "© 2026 無恙 · CONCEPT", "看一次演示": "看一次演示", "判断": "判斷", "思路": "思路", "依据": "依據", "没做到的": "沒做到的", "为什么不是摄像头，<br>也不是手环。": "爲什麼不是攝像頭，<br>也不是手環。", "浴室和卧室是跌倒最多的地方，也是这两样东西最不好用的地方。<br>对失能、失智、术后的人来说，被一直看着，本身就是一种压力。": "浴室和臥室是跌倒最多的地方，也是這兩樣東西最不好用的地方。<br>對失能、失智、術後的人來說，被一直看著，本身就是一種壓力。", "装摄像头这件事，<br>很多老人嘴上答应，心里是介意的。": "裝攝像頭這件事，<br>很多老人嘴上答應，心裡是介意的。", "它怎么判断。": "它怎麼判斷。", "WiFi 信号一直在房间里反射。人站着、走动、躺下，信号到达接收端的样子都会变。我们不看画面，只看这种变化。": "WiFi 信號一直在房間裡反射。人站著、走動、躺下，信號到達接收端的樣子都會變。我們不看畫面，只看這種變化。", "判断够确定才升级：先问本人，再找家人，最后才是急救。": "判斷夠確定才升級：先問本人，再找家人，最後才是急救。", "不确定的时候，<span class=\"nw\">先问人</span>。": "不確定的時候，<span class=\"nw\">先問人</span>。", "误报会消耗信任。每次升级前，都先给本人和家人留一个说「不」的机会。": "誤報會消耗信任。每次升級前，都先給本人和家人留一個說「不」的機會。", "这件事，<br>别人做到哪一步了。": "這件事，<br>別人做到哪一步了。", "论文、开源代码、硬件成本都摆在这里。你可以自己判断，我们是不是在说大话。": "論文、開源代碼、硬件成本都擺在這裡。你可以自己判斷，我們是不是在說大話。", "做不到的地方，<br>我们也写在这里。": "做不到的地方，<br>我們也寫在這裡。", "三个人，一个学期，能做的很有限。": "三個人，一個學期，能做的很有限。", "点播放。这是模拟，但每一步都是我们打算真做出来的。": "點播放。這是模擬，但每一步都是我們打算真做出來的。", "<b>还没有一款被大规模验证的家用产品。</b>论文里的指标大多来自受控房间；真实家庭里的误报率、长期稳定性，公开数据很少。所以我们不写准确率。": "<b>還沒有一款被大規模驗證的家用產品。</b>論文裡的指標大多來自受控房間；真實家庭裡的誤報率、長期穩定性，公開數據很少。所以我們不寫準確率。", "跌倒是 65 岁以上老人伤害死亡的首位原因。<br>我们想用家里的 WiFi 信号，判断有没有人摔倒；先问一句，<strong class=\"nw\">十秒没有回应</strong>，再叫家人。": "跌倒是 65 歲以上老人傷害死亡的首位原因。<br>我們想用家裡的 WiFi 信號，判斷有沒有人摔倒；先問一句，<strong class=\"nw\">十秒沒有回應</strong>，再叫家人。", "流程": "流程", "一次跌倒，接下来会发生什么。": "一次跌倒，接下來會發生什麼。", "这是模拟。但每一步，都是我们打算真做出来的。": "這是模擬。但每一步，都是我們打算真做出來的。", "本人应答": "本人應答", "SENSING · 客厅": "SENSING · 客廳", "为演示加速：真实响应链约 50 秒。": "為演示加速：真實響應鏈約 50 秒。", "全屋 · 78 m²": "全屋 · 78 m²", "WiFi 信号穿过墙壁。<em>人在哪、站还是躺，它都能感觉到。</em>": "WiFi 訊號穿過牆壁。<em>人在哪、站還是躺，它都能感覺到。</em>", "这些不是我们说的。": "這些不是我們說的。", "论文、代码、数据都在下面，你可以自己去查。": "論文、代碼、數據都在下面，你可以自己去查。", "星数不等于可信。最后一张是十万星的反例，前两张才是有论文、有代码的那种。": "星數不等於可信。最後一張是十萬星的反例，前兩張才是有論文、有代碼的那種。", "做不到的，<br>也写在这。": "做不到的，<br>也寫在這。", "只能一个人": "只能一個人", "两个人在动，信号会混。": "兩個人在動，信號會混。", "只能一个家": "只能一個家", "换房间，要重新学几天。": "換房間，要重新學幾天。", "不做诊断": "不做診斷", "只发现、只通知。": "只發現、只通知。", "边界": "邊界"}, "en": {"<span class=\"brand-name\">无恙</span> <span class=\"brand-sub\">WiFi 无感守护</span>": "<span class=\"brand-name\">Stillwell</span> <span class=\"brand-sub\">Wi-Fi ambient care</span>", "演示": "Demo", "概念演示 · CONCEPT": "Concept demo", "AI in Healthcare · 居家守护构想": "AI in Healthcare · a home-care concept", "不开摄像头，<br>也知道家人<br><span class=\"hl\">是否安好</span>。": "No camera.<br>Still it knows<br><span class=\"hl\">they’re okay</span>.", "为什么是 WiFi": "Why Wi-Fi", "<i></i>无需摄像头": "<i></i>No camera", "<i></i>无需穿戴": "<i></i>No wearable", "<i></i>无需改造房屋": "<i></i>No rewiring", "客厅 · 3.2 × 4.0 m": "Living room · 3.2 × 4.0 m", "状态": "Status", "站立 · 静止": "Standing · still", "信号": "Signal", "良好": "Good", "延迟": "Latency", "人体会扰动 WiFi 信号。<em>姿态改变，波形随之改变。</em>": "Bodies disturb Wi-Fi signals. <em>Change the posture, change the waveform.</em>", "一次跌倒，<span class=\"nw\">72 秒里会发生什么。</span>": "A fall — and the <span class=\"nw\">next 72 seconds</span>.", "响应链路模拟": "Escalation simulation", "8× 速度": "8× speed", "播放演示": "Play demo", "重置": "Reset", "WiFi · 5.8 GHz": "Wi-Fi · 5.8 GHz", "信号波形": "Signal", "检测": "Detect", "姿态突变：站立 → 卧倒": "Posture change: standing → down", "信号在 0.8 秒内剧烈变化，置信度 0.93。现场响起提示音。": "The signal shifts sharply within 0.8 s; confidence 0.93. A prompt sounds in the room.", "询问": "Ask", "先问一句：您还好吗？": "First question: are you okay?", "本地语音询问，等待 10 秒。这 10 秒，是留给本人的机会。": "A local voice prompt, then a 10-second wait. Those 10 seconds belong to the person.", "通知": "Notify", "没有回应，呼叫家属": "No answer — call the family", "App 推送 + 电话呼叫，附上现场状态摘要，而不是一段冰冷的报警。": "App push and a phone call, with a summary of what happened — not a cold alarm.", "升级": "Escalate", "家属未接，转第二联系人": "No pickup — second contact", "继续呼叫备用联系人，或接入社区养老平台的值班坐席。": "Call the backup contact, or the on-duty desk at a community care platform.", "急救": "Emergency", "人工确认后，协助呼叫急救": "After human confirmation, help call EMS", "由坐席确认情况，再协助拨打 120——最后一跳，必须有人。": "A person confirms the situation, then helps dial 120 — the last step always involves a human.", "模拟时间": "Simulated time", "模拟本人应答「我没事」": "Simulate \"I’m okay\"", "提示：播放过程中随时点击 <b>「本人应答」</b>，看看升级链如何被取消——误报不该惊动任何人。": "Tip: press <b>\"I’m okay\"</b> at any point and watch the escalation unwind — a false alarm shouldn’t wake anyone.", "浴室": "Bathroom", "客厅": "Living room", "同一分钟，三种设备各自看到什么": "One minute, three devices, three different views", "摄像头": "Camera", "✕ 浴室不可用": "✕ Not in a bathroom", "✓ 客厅可用": "✓ Fine in a living room", "不能装，也不该装": "It can’t be installed — or shouldn’t be", "没有哪个家庭愿意把浴室里的画面交出去，照护机构更不会承担这个风险。": "No family wants to hand over footage from a bathroom. A care provider won’t take that risk either.", "能看见，但只在客厅": "It can see — but only in the living room", "画面依然存在，也依然需要被拍摄的人点头同意。": "The image still exists, and still needs consent from the person in it.", "需要被拍摄者同意": "Needs the subject’s consent", "手环": "Wristband", "✕ 洗澡时会摘下": "✕ Comes off in the shower", "✓ 戴着时有效": "✓ Only while worn", "摘下来，就是一段盲区": "Take it off, and you’re blind", "防水不等于愿意戴。充电、皮肤不适、忘记戴——任何一次摘下，都可能刚好是出事的那几分钟。": "Waterproof doesn’t mean willing. Charging, skin irritation, forgetting — any one of those gaps can land on the exact minutes that matter.", "戴着的时候才有效": "It works while it’s worn", "前提是记得戴、记得充电、愿意一直戴。": "If it’s remembered, charged, and kept on.", "需要每天佩戴": "Must be worn every day", "✓ 隔墙仍在工作": "✓ Works through the wall", "✓ 本来就在工作": "✓ Always on", "不需要你配合": "Nothing for you to do", "不采集图像，不记录声音，只读取信号被身体扰动的变化——在浴室里也一样。": "No images, no audio — just how your body disturbs the signal. A bathroom is no different.", "一样在工作": "Still working", "它本来就不需要你配合。": "It never needed your cooperation.", "无需佩戴 · 无需配合": "Nothing to wear · nothing to do", "<span class=\"c-bath\">跌倒最高发的地方，恰好是另外两种设备最无能为力的地方。</span> <span class=\"c-living\">客厅里三种方案都能用。真正拉开差距的，是那扇关上的门。</span>": "<span class=\"c-bath\">Where falls happen most is exactly where the other two fail.</span> <span class=\"c-living\">In the living room, all three work. The difference is the door that closes.</span>", "<span>不采集图像</span> <span>不记录声音</span> <span>数据留在家中</span>": "<span>No images</span> <span>No audio</span> <span>Data stays home</span>", "发射": "Transmit", "家里的 WiFi 一直在工作。看不见，但铺满整个房间。": "The Wi-Fi at home is always on. Invisible, but filling every room.", "扰动": "Disturb", "呼吸、走动、突然倒下，都会改变电波的反射路径。": "Breathing, walking, a sudden fall — all change how the waves reflect.", "解读": "Interpret", "盒子把这种变化读成三种状态：没人在、有人在动、有人倒下。": "The box reads that change as three states: nobody, someone moving, someone down.", "响应": "Respond", "时间": "Time", "系统动作": "What the system does", "谁可以取消": "Who can stop it", "<b>检测到姿态突变</b><span>现场提示音，本地记录一段信号片段</span>": "<b>Posture change detected</b><span>Prompt sounds; a short signal sample is stored locally</span>", "本人起身，或语音说「我没事」": "The person gets up, or says \"I’m okay\"", "<b>本地语音询问</b><span>「您还好吗？需要帮忙请回答。」等待 10 秒</span>": "<b>Local voice check</b><span>\"Are you okay? Say something if you need help.\" Wait 10 s</span>", "本人任何一句应答": "Any answer from the person", "<b>通知家属</b><span>App 推送、电话呼叫，附现场状态摘要</span>": "<b>Family notified</b><span>App push and phone call, with a status summary</span>", "家属在 App 内确认「已联系，无需升级」": "Family confirms \"I’ve reached them\" in the app", "<b>升级到第二联系人</b><span>备用联系人，或社区养老平台值班坐席</span>": "<b>Escalate to second contact</b><span>Backup contact, or the on-duty community care desk</span>", "家属或平台坐席": "Family or the care desk", "<b>人工确认后呼叫急救</b><span>坐席核实情况，协助拨打 120</span>": "<b>Emergency call after human review</b><span>The desk verifies the situation and helps dial 120</span>", "已进入人工流程，不再自动取消": "Once a human is involved, no automatic cancel", "自动直拨 110 / 120 在合规与误报责任上都走不通，所以最后一跳始终由人完成。我们相信，这不会削弱它，反而让它更值得被信任。": "Auto-dialling 110 / 120 fails on both compliance and liability. So the last step is always made by a person. We think that makes it more trustworthy, not less.", "01 / 研究": "01 / Research", "论文里已经做到": "It works in the lab", "<b>MM-Fi</b>（NeurIPS 2023）：40 人、27 种动作、32 万帧的 WiFi 与视觉配对数据集。": "<b>MM-Fi</b> (NeurIPS 2023): Wi-Fi paired with vision across 40 people, 27 actions and 320k frames.", "<b>Person-in-WiFi-3D</b>（CVPR 2024）：只用 WiFi 重建三维人体，单人误差 91.7 mm。": "<b>Person-in-WiFi-3D</b> (CVPR 2024): rebuilds a 3D body from Wi-Fi alone, with a 91.7 mm error for one person.", "<b>HPE-Li</b>（ECCV 2024）：换一个房间也能估计姿态，代码已开源。": "<b>HPE-Li</b> (ECCV 2024): estimates pose in a new room, code included.", "<b>跌倒检测</b>（arXiv 2026）：两块 ESP32、相距 3.5 米，93.1% 准确率、87.5% 召回率。": "<b>Fall detection</b> (arXiv 2026): two ESP32 boards 3.5 m apart, 93.1% accuracy and 87.5% recall.", "02 / 开源": "02 / Open source", "代码是拿得到的": "The code is out there", "HPE-Li、DT-Pose、PerceptAlign、WiSPPN、VST-Pose 都带着论文和训练脚本。": "HPE-Li, DT-Pose, PerceptAlign, WiSPPN and VST-Pose all ship with papers and training scripts.", "想从硬件做起：<b>csi-pose</b> 用六块 ESP32 做端到端姿态，<b>ESP32-CSI-Tool</b> 负责采原始数据。": "Starting from hardware: <b>csi-pose</b> does end-to-end pose with six ESP32 boards; <b>ESP32-CSI-Tool</b> captures the raw signal.", "数据集 MM-Fi、Wi-Pose 公开下载，不必从零开始采。": "MM-Fi and Wi-Pose download openly — no need to collect from zero.", "03 / 硬件与标准": "03 / Hardware & standards", "成本比想象中低": "Cheaper than it sounds", "两块 ESP32 开发板就能采到 CSI，百元级成本。": "Two ESP32 boards are enough to capture CSI, at a cost in the low hundreds of yuan.", "普通家用路由器只提供 RSSI，不开放 CSI——所以感知要靠一个外挂的小盒子。": "An ordinary home router exposes only RSSI, not CSI — so sensing needs a small add-on box.", "IEEE 802.11bf-2025 已把「WLAN 感知」写进标准；也有路由器厂商做过运动感知产品。": "IEEE 802.11bf-2025 writes WLAN sensing into the standard, and router makers have already shipped motion-sensing products.", "但是": "BUT", "所以": "SO", "<b>星数不等于可信。</b>我们查过 GitHub 上星数最高的几个 WiFi 姿态项目：有的十万星，核心代码却是随机数，没有权重、没有评测。这里只引用带论文、带数据集、能复现的实现。": "<b>Stars are not evidence.</b> We looked at the most-starred Wi-Fi pose repos on GitHub: one has over 100k stars, yet its core extractor returns random arrays, ships no weights and has no evaluation. This page only cites work with a paper, a dataset and reproducible code.", "资料来源：NeurIPS 2023 MM-Fi · CVPR 2024 Person-in-WiFi-3D · ECCV 2024 HPE-Li · arXiv 2026 跌倒检测 · IEEE 802.11bf-2025 · GitHub 项目页（星数为 2026 年 11 月快照）。": "Sources: NeurIPS 2023 MM-Fi · CVPR 2024 Person-in-WiFi-3D · ECCV 2024 HPE-Li · arXiv 2026 fall detection · IEEE 802.11bf-2025 · GitHub project pages (star counts as of Nov 2026).", "只能应付单人": "One person at a time", "家里同时有两个人在动，信号会混在一起。这是公开的难题，我们不打算在第一版里假装解决它。": "Two people moving at once blend into the same signal. That’s an open problem, and we won’t pretend otherwise in v1.", "只能守住熟悉的户型": "Only the home it has learned", "换一个房间、换一套家具，「信号指纹」就会变。它需要先在这个家里安静地学上几天。": "A new room or new furniture changes the signal fingerprint. It needs a few quiet days in this home first.", "不能替代医疗判断": "Not a medical judgement", "它只负责「发现异常、及时通知」，不做诊断，不判断病因，也不决定用药。": "It notices and notifies. It doesn’t diagnose, name a cause, or decide on medication.", "让每一个独自在家的人，<br>都被<span>安静地知道</span>。": "So that everyone who lives alone<br>is <span>quietly known</span>.", "页面": "Pages", "项目": "Project", "课程概念项目": "Course concept project", "2026 · 小组作业": "2026 · Group project", "<b>本页面为概念演示。</b>不包含真实设备、真实模型、真实呼叫，也不构成任何医疗建议。页面中的时间线、置信度与响应策略均为设计示意。": "<b>This page is a concept demo.</b> It contains no real device, model, or call, and is not medical advice. The timeline, confidence values and response policy are design illustrations.", "© 2026 无恙 · CONCEPT": "© 2026 Stillwell · CONCEPT", "看一次演示": "See the demo", "判断": "Why Wi-Fi", "思路": "Approach", "依据": "Evidence", "没做到的": "What's missing", "为什么不是摄像头，<br>也不是手环。": "Why not a camera,<br>and why not a wristband.", "浴室和卧室是跌倒最多的地方，也是这两样东西最不好用的地方。<br>对失能、失智、术后的人来说，被一直看着，本身就是一种压力。": "Bathrooms and bedrooms are where falls happen most — and where neither device works well.<br>For someone frail, living with dementia, or recovering from surgery, being watched all day is a pressure of its own.", "装摄像头这件事，<br>很多老人嘴上答应，心里是介意的。": "Many older people say yes to a camera.<br>They mind it more than they let on.", "它怎么判断。": "How it decides.", "WiFi 信号一直在房间里反射。人站着、走动、躺下，信号到达接收端的样子都会变。我们不看画面，只看这种变化。": "Wi-Fi bounces around the room. Standing, walking, lying down — each changes what the receiver sees. We don’t watch the picture; we watch that change.", "判断够确定才升级：先问本人，再找家人，最后才是急救。": "Only a confident reading escalates: ask the person, then the family, then emergency services.", "不确定的时候，<span class=\"nw\">先问人</span>。": "When unsure, <span class=\"nw\">ask first</span>.", "误报会消耗信任。每次升级前，都先给本人和家人留一个说「不」的机会。": "False alarms cost trust. Before each escalation, the person and the family get a chance to say no.", "这件事，<br>别人做到哪一步了。": "How far<br>other people got.", "论文、开源代码、硬件成本都摆在这里。你可以自己判断，我们是不是在说大话。": "Papers, open-source code, hardware costs. Judge for yourself whether we’re overselling.", "做不到的地方，<br>我们也写在这里。": "What it can’t do,<br>we write down too.", "三个人，一个学期，能做的很有限。": "Three people, one semester. There’s only so much we can do.", "点播放。这是模拟，但每一步都是我们打算真做出来的。": "Press play. It’s a simulation, but every step is one we plan to build.", "<b>还没有一款被大规模验证的家用产品。</b>论文里的指标大多来自受控房间；真实家庭里的误报率、长期稳定性，公开数据很少。所以我们不写准确率。": "<b>No home product has been validated at scale.</b> Paper metrics mostly come from controlled rooms; real-home false-alarm rates and long-term stability are rarely published — so we don’t print an accuracy number.", "跌倒是 65 岁以上老人伤害死亡的首位原因。<br>我们想用家里的 WiFi 信号，判断有没有人摔倒；先问一句，<strong class=\"nw\">十秒没有回应</strong>，再叫家人。": "Falls are the leading cause of injury death for people over 65.<br>We use the Wi-Fi in the home to tell whether someone has fallen: it asks first, and if <strong class=\"nw\">no one answers in ten seconds</strong>, it calls the family.", "流程": "Process", "一次跌倒，接下来会发生什么。": "A fall. Then what?", "这是模拟。但每一步，都是我们打算真做出来的。": "It’s a simulation. Every step is one we intend to build.", "本人应答": "I’m okay", "SENSING · 客厅": "SENSING · Living room", "为演示加速：真实响应链约 50 秒。": "Sped up for the demo — the real chain takes about 50 seconds.", "全屋 · 78 m²": "Whole home · 78 m²", "WiFi 信号穿过墙壁。<em>人在哪、站还是躺，它都能感觉到。</em>": "Wi-Fi passes through walls. <em>Where someone is, standing or lying — it can tell.</em>", "这些不是我们说的。": "This isn’t our claim.", "论文、代码、数据都在下面，你可以自己去查。": "Papers, code and data are below. Go and check them yourself.", "星数不等于可信。最后一张是十万星的反例，前两张才是有论文、有代码的那种。": "Stars aren’t evidence. The last card is a 100k-star counterexample; the first two come with papers and code.", "做不到的，<br>也写在这。": "What it can’t do,<br>we write down too.", "只能一个人": "One person", "两个人在动，信号会混。": "Two people moving at once blend into one signal.", "只能一个家": "One home", "换房间，要重新学几天。": "A new room takes days to learn.", "不做诊断": "No diagnosis", "只发现、只通知。": "It notices, and it tells someone.", "边界": "Limits"}};var DYN={"zh-Hans": {"st_idle": "监测中", "st_fall": "检测到跌倒", "st_ask": "语音询问中", "st_family": "呼叫家属", "st_escalate": "升级中", "st_handoff": "已转人工坐席", "st_answered": "本人已应答", "play": "播放演示", "playing": "演示中…", "replay": "重播", "room": "客厅 · 3.2m × 4.0m · 单人", "title": "无恙 · 用 WiFi 守住家人的平安", "desc": "无恙是一个关于 WiFi 无感守护的构想：不装摄像头、不戴设备，用家里的 WiFi 信号感知跌倒，先问一句，再叫家人。"}, "zh-Hant": {"st_idle": "監測中", "st_fall": "檢測到跌倒", "st_ask": "語音詢問中", "st_family": "呼叫家屬", "st_escalate": "升級中", "st_handoff": "已轉人工坐席", "st_answered": "本人已應答", "play": "播放演示", "playing": "演示中…", "replay": "重播", "room": "客廳 · 3.2m × 4.0m · 單人", "title": "無恙 · 用 WiFi 守住家人的平安", "desc": "無恙是一個關於 WiFi 無感守護的構想：不裝攝像頭、不戴設備，用家裡的 WiFi 信號感知跌倒，先問一句，再叫家人。"}, "en": {"st_idle": "Monitoring", "st_fall": "Fall detected", "st_ask": "Asking", "st_family": "Calling family", "st_escalate": "Escalating", "st_handoff": "With a human now", "st_answered": "They answered", "play": "Play demo", "playing": "Playing…", "replay": "Replay", "room": "Living room · 3.2m × 4.0m · one person", "title": "Stillwell · Wi-Fi care, without a camera", "desc": "Stillwell is a concept for ambient Wi-Fi care: no camera, nothing to wear. It senses a fall, asks first, then calls the family."}};
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- i18n ---------- */
+  var lang = 'zh-Hans';
+  try { lang = localStorage.getItem('wy-lang') || 'zh-Hans'; } catch(e){}
+  var i18nNodes = [];
+  var curStatusKey = 'idle', curStatusCls = '', curPlay = 'play';
+  function norm(s){ return String(s).replace(/\s+/g,' ').trim(); }
+  function dyn(k){
+    var pack = (typeof DYN !== 'undefined') ? (DYN[lang] || DYN['zh-Hans']) : null;
+    return (pack && pack[k] != null) ? pack[k] : '';
+  }
+  (function(){
+    var all = document.body.querySelectorAll('*');
+    for (var i=0;i<all.length;i++){
+      var el = all[i], tag = el.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'SVG') continue;
+      if (el.id === 'roomStatus' || el.id === 'playBtn' || el.id === 'lang') continue;
+      var k = norm(el.innerHTML);
+      if (!k || k.length > 600) continue;
+      if (!I18N.en[k]) continue;
+      var par = el.parentElement, taken = false;
+      while (par){ if (par.__i18n){ taken = true; break; } par = par.parentElement; }
+      if (taken) continue;
+      el.__i18n = true;
+      el.__zh = el.innerHTML;
+      i18nNodes.push({ el: el, key: k });
+    }
+  })();
+  function applyI18n(l){
+    for (var i=0;i<i18nNodes.length;i++){
+      var n = i18nNodes[i], v = null;
+      if (l === 'zh-Hans') v = n.el.__zh;
+      else if (I18N[l] && I18N[l][n.key] != null) v = I18N[l][n.key];
+      if (v != null && v !== n.el.innerHTML) n.el.innerHTML = v;
+    }
+  }
+  function applyDyn(){
+    var st = document.getElementById('roomStatus');
+    var pb = document.getElementById('playBtn');
+    if (st) setStatus(curStatusKey, curStatusCls);
+    if (pb){ var lab = pb.querySelector('span'); if (lab) lab.textContent = dyn(curPlay); }
+    var rl = document.getElementById('roomLabel');
+    if (rl) rl.textContent = dyn('room');
+    if (dyn('title')) document.title = dyn('title');
+    var md = document.querySelector('meta[name="description"]');
+    if (md && dyn('desc')) md.setAttribute('content', dyn('desc'));
+  }
+  var langBtns = Array.prototype.slice.call(document.querySelectorAll('.lang button'));
+  function applyLang(l){
+    lang = l;
+    document.documentElement.setAttribute('lang', l === 'en' ? 'en' : (l === 'zh-Hant' ? 'zh-Hant' : 'zh-CN'));
+    langBtns.forEach(function(b){
+      var on = b.getAttribute('data-lang') === l;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    applyI18n(l);
+    applyDyn();
+  }
+  langBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var l = b.getAttribute('data-lang');
+      applyLang(l);
+      try { localStorage.setItem('wy-lang', l); } catch(e){}
+    });
+  });
+
+  /* ---------- nav ---------- */
+  var nav = document.getElementById('nav');
+  function onScroll(){
+    if (window.scrollY > 24) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- privacy scene ---------- */
+  var cmp = document.getElementById('cmp');
+  var segBtns = Array.prototype.slice.call(document.querySelectorAll('.seg-btn'));
+  segBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var sc = b.getAttribute('data-scene');
+      cmp.setAttribute('data-scene', sc);
+      segBtns.forEach(function(x){
+        var on = (x === b);
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    });
+  });
+
+  /* ---------- reveal ---------- */
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    reveals.forEach(function(el){ io.observe(el); });
+  } else {
+    reveals.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- bars ---------- */
+  function buildBars(box, n){
+    var arr = [];
+    for (var i=0;i<n;i++){
+      var b = document.createElement('i');
+      box.appendChild(b); arr.push(b);
+    }
+    return arr;
+  }
+  function shapeBars(bars, energy, t, mini){
+    var n = bars.length;
+    for (var i=0;i<n;i++){
+      var v;
+      if (mini){
+        v = 12 + Math.abs(Math.sin(i*0.72 + t*0.0028))*48 + Math.random()*34;
+        if (energy > 2) v = 12 + Math.random()*86;
+      } else {
+        var base = 16 + Math.sin(i*0.55 + t*0.0022)*10 + Math.sin(i*0.17 + t*0.0011)*7;
+        var noise = Math.random()*22*energy;
+        var env = Math.exp(-Math.pow((i-n*0.42)/(n*0.3),2))*26;
+        v = base + noise + env*energy;
+      }
+      bars[i].style.height = Math.max(6, Math.min(100, v)) + '%';
+    }
+  }
+
+  /* ---------- hero bars ---------- */
+
+
+  /* ---------- demo ---------- */
+  var DT = {
+    'zh-Hans': {
+      beats:['23:41。人还站着。','人倒了。','先问一句，等十秒。','没有回应，打电话给女儿。','女儿回拨，还是没人接。','联系物业，上门。','家人和急救一起到。','送医。剩下的，交给医生。'],
+      st:['监测中','检测到跌倒','询问中','呼叫家属','家属回拨','物业上门','急救到场','已送医'],
+      name:'女儿', callOut:'正在呼叫…', callOn:'已接通', callBack:'回拨中…', noAns:'无人接听',
+      ans:'本人应答，升级取消。', ansSt:'本人已应答',
+      play:'播放演示', playing:'演示中…', replay:'重播', reset:'重置', answer:'本人应答'
+    },
+    'zh-Hant': {
+      beats:['23:41。人還站著。','人倒了。','先問一句，等十秒。','沒有回應，打電話給女兒。','女兒回撥，還是沒人接。','聯絡物業，上門。','家人和急救一起到。','送醫。剩下的，交給醫生。'],
+      st:['監測中','檢測到跌倒','詢問中','呼叫家屬','家屬回撥','物業上門','急救到場','已送醫'],
+      name:'女兒', callOut:'正在呼叫…', callOn:'已接通', callBack:'回撥中…', noAns:'無人接聽',
+      ans:'本人應答，升級取消。', ansSt:'本人已應答',
+      play:'播放演示', playing:'演示中…', replay:'重播', reset:'重置', answer:'本人應答'
+    },
+    'en': {
+      beats:['23:41. Still standing.','Someone is down.','It asks. Ten seconds.','No answer — call the daughter.','She calls back. No pickup.','Call the building desk.','Family and paramedics arrive.','To hospital. The rest is up to the doctors.'],
+      st:['Monitoring','Fall detected','Asking','Calling family','Calling back','Building desk','Paramedics','Taken to hospital'],
+      name:'Daughter', callOut:'Calling…', callOn:'Connected', callBack:'Calling back…', noAns:'No answer',
+      ans:'They answered. Escalation cancelled.', ansSt:'They answered',
+      play:'Play demo', playing:'Playing…', replay:'Replay', reset:'Reset', answer:'I’m okay'
+    }
+  };
+  function dt(){ return DT[lang] || DT['zh-Hans']; }
+
+  var BEATS = [0, 2.0, 3.0, 7.0, 11.0, 14.5, 17.5, 21.0];
+  var DUR = 24;
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('stageCanvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var W = 1000, H = 520;
+  var PIVOT = {x: 500, y: 434};
+
+  var t = 0, playing = false, finished = false, answered = false, visualF = 0, last = 0;
+  var playBtn = document.getElementById('playBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var cancelBtn = document.getElementById('cancelBtn');
+  var playLabel = playBtn.querySelector('span');
+  var subLine = document.getElementById('subLine');
+  var stChip = document.getElementById('stChip');
+  var phone = document.getElementById('phone');
+  var phName = document.getElementById('phName');
+  var phState = document.getElementById('phState');
+  var doorScene = document.getElementById('doorScene');
+  var emsScene = document.getElementById('emsScene');
+  var prog = document.getElementById('prog');
+  var lastUI = '';
+
+  var FLOOR = 424;
+  var PIV = {x: 500, y: 424};
+  function r1(a, b){ return a + Math.random() * (b - a); }
+  function ptCircle(cx, cy, r){ var a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * r; return [cx + Math.cos(a) * d, cy + Math.sin(a) * d]; }
+  function ptLine(x1, y1, x2, y2, r){ var u = Math.random(), a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * r; return [x1 + (x2 - x1) * u + Math.cos(a) * d, y1 + (y2 - y1) * u + Math.sin(a) * d]; }
+  var body = [];
+  (function(){
+    var i;
+    for (i = 0; i < 64; i++){ var h = ptCircle(500, 120, 31); body.push({x: h[0], y: h[1], s: r1(.8, 1.5)}); }
+    for (i = 0; i < 110; i++){
+      var y = r1(154, 300), half = 31 - (y - 154) / 146 * 9;
+      body.push({x: 500 + r1(-half, half), y: y, s: r1(.8, 1.5)});
+    }
+    for (i = 0; i < 26; i++){ var a1 = ptLine(474, 166, 446, 280, 10); body.push({x: a1[0], y: a1[1], s: r1(.8, 1.5)}); }
+    for (i = 0; i < 26; i++){ var a2 = ptLine(526, 166, 554, 280, 10); body.push({x: a2[0], y: a2[1], s: r1(.8, 1.5)}); }
+    for (i = 0; i < 30; i++){ var l1 = ptLine(490, 302, 482, 420, 12); body.push({x: l1[0], y: l1[1], s: r1(.8, 1.5)}); }
+    for (i = 0; i < 30; i++){ var l2 = ptLine(510, 302, 518, 420, 12); body.push({x: l2[0], y: l2[1], s: r1(.8, 1.5)}); }
+  })();
+
+  function resize(){
+    var w = stage.clientWidth, h = stage.clientHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+  }
+  window.addEventListener('resize', resize);
+
+  function silhouette(col){
+    ctx.fillStyle = 'rgba(' + col + ',.085)';
+    ctx.beginPath(); ctx.arc(500, 120, 33, 0, 6.283); ctx.fill();
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(467, 148, 66, 158, 26); else ctx.rect(467, 148, 66, 158);
+    ctx.fill();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(' + col + ',.075)';
+    ctx.lineWidth = 27;
+    ctx.beginPath(); ctx.moveTo(474, 168); ctx.lineTo(446, 280); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(526, 168); ctx.lineTo(554, 280); ctx.stroke();
+    ctx.lineWidth = 32;
+    ctx.beginPath(); ctx.moveTo(490, 300); ctx.lineTo(482, 420); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(510, 300); ctx.lineTo(518, 420); ctx.stroke();
+  }
+
+  function draw(now){
+    var w = stage.clientWidth, h = stage.clientHeight;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var narrow = (w / h) < 1.5;
+    var s = narrow ? Math.min(w / 560, h / 340) : Math.min(w / W, h / H), ox = (w - W * s) / 2, oy = (h - H * s) / 2;
+    ctx.save();
+    ctx.translate(ox, oy);
+    ctx.scale(s, s);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.045)';
+    ctx.lineWidth = 1;
+    for (var gx = 60; gx < W; gx += 62){ ctx.beginPath(); ctx.moveTo(gx, 40); ctx.lineTo(gx, 470); ctx.stroke(); }
+    for (var gy = 90; gy < 470; gy += 62){ ctx.beginPath(); ctx.moveTo(40, gy); ctx.lineTo(960, gy); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(127,211,174,.16)';
+    ctx.beginPath(); ctx.moveTo(40, FLOOR + 4); ctx.lineTo(960, FLOOR + 4); ctx.stroke();
+
+    var scanX = 120 + ((now * 0.075) % 1) * 760;
+    var grd = ctx.createLinearGradient(scanX - 44, 0, scanX, 0);
+    grd.addColorStop(0, 'rgba(127,211,174,0)');
+    grd.addColorStop(1, 'rgba(127,211,174,.05)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(scanX - 26, 60, 26, 380);
+    ctx.fillStyle = 'rgba(127,211,174,.5)';
+    ctx.fillRect(scanX, 60, 1.2, 380);
+
+    var e = visualF;
+    ctx.globalAlpha = answered ? 1 : Math.max(0, Math.min(1, (24 - t) / 3.2));
+    var alert = e > 0.55 && !answered;
+    var col = alert ? '232,132,92' : '127,211,174';
+    var rot = -Math.PI / 2 * e;
+    var cos = Math.cos(rot), sin = Math.sin(rot);
+    var shift = e * 120;
+
+    if (e > 0.55){
+      for (var k = 0; k < 3; k++){
+        var ph = ((now * 0.34 + k / 3) % 1), rr = 70 + ph * 180;
+        ctx.strokeStyle = 'rgba(' + col + ',' + (0.16 * (1 - ph) * e).toFixed(3) + ')';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(480 + shift * 0.6, FLOOR + 3, rr, rr * 0.22, 0, 0, 6.283); ctx.stroke();
+      }
+    }
+
+    var sg = ctx.createRadialGradient(500 + shift * 0.4, FLOOR - 4, 0, 500 + shift * 0.4, FLOOR - 4, 190);
+    sg.addColorStop(0, 'rgba(' + col + ',.10)');
+    sg.addColorStop(1, 'rgba(' + col + ',0)');
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.ellipse(500 + shift * 0.4, FLOOR - 2, 190, 22, 0, 0, 6.283); ctx.fill();
+
+    ctx.save();
+    ctx.translate(PIV.x + shift, PIV.y);
+    ctx.rotate(rot);
+    ctx.translate(-PIV.x, -PIV.y);
+    silhouette(col);
+    ctx.restore();
+
+    var breathe = Math.sin(now * 1.7) * 1.6 * (1 - e);
+    for (var p = 0; p < body.length; p++){
+      var b = body[p];
+      var dx = b.x - PIV.x, dy = b.y - PIV.y + breathe;
+      var x = PIV.x + dx * cos - dy * sin + shift;
+      var y = PIV.y + dx * sin + dy * cos;
+      var near = Math.max(0, 1 - Math.abs(x - scanX) / 55);
+      var al = 0.38 + near * 0.40 + Math.random() * 0.10;
+      ctx.fillStyle = 'rgba(' + col + ',' + al.toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(x, y, b.s * 1.35 + near * 1.2, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function beatIndex(){
+    for (var i = BEATS.length - 1; i >= 0; i--) if (t >= BEATS[i]) return i;
+    return 0;
+  }
+  function setText(el, v){ if (el && el.textContent !== v) el.textContent = v; }
+
+  function updateUI(){
+    var d = dt();
+    var bi = beatIndex();
+    var state = answered ? 'ans' : bi;
+    var key = state + '|' + playing + '|' + Math.floor(t);
+    if (key === lastUI) return;
+    lastUI = key;
+
+    setText(subLine, answered ? d.ans : d.beats[bi]);
+    setText(stChip.firstChild.nextSibling, answered ? d.ansSt : d.st[bi]);
+    stChip.className = 'hud-state' + (answered ? '' : (bi === 1 ? ' alert' : (bi >= 2 && bi <= 5 ? ' warn' : (bi >= 6 ? ' alert' : ''))));
+
+    var showPhone = !answered && (bi === 3 || bi === 4);
+    phone.classList.toggle('on', showPhone);
+    if (showPhone){
+      setText(phName, d.name);
+      var ringing = (bi === 3 && t < 9.6) || (bi === 4 && t < 13.6);
+      phone.classList.toggle('ring', ringing);
+      setText(phState, bi === 3 ? (t < 9.6 ? d.callOut : d.callOn) : (t < 13.6 ? d.callBack : d.noAns));
+    }
+
+    var showDoor = !answered && bi === 5;
+    var showEms = !answered && bi === 6;
+    doorScene.classList.toggle('on', showDoor);
+    emsScene.classList.toggle('on', showEms);
+    stage.classList.toggle('scened', showDoor || showEms);
+
+    prog.style.width = Math.min(100, t / DUR * 100) + '%';
+    setText(playLabel, playing ? d.playing : ((finished || answered || t > 0.2) ? d.replay : d.play));
+    setText(resetBtn, d.reset);
+    setText(cancelBtn, d.answer);
+    cancelBtn.disabled = !(playing && t >= 0.8 && t < 21) || answered;
+  }
+
+  function tick(now){
+    if (playing){
+      if (!last) last = now;
+      t += (now - last) / 1000;
+      last = now;
+      if (t >= DUR){ t = DUR; playing = false; finished = true; last = 0; }
+    } else last = 0;
+
+    var target = answered ? 0 : Math.max(0, Math.min(1, (t - 2.0) / 1.0));
+    target = 1 - Math.pow(1 - target, 3);
+    visualF += (target - visualF) * 0.14;
+
+    draw(now / 1000);
+    updateUI();
+    requestAnimationFrame(tick);
+  }
+
+  function start(){
+    if (playing) return;
+    if (finished || answered) reset();
+    playing = true;
+    last = 0;
+    if (t < 0.01) t = 0.01;
+    cancelBtn.disabled = false;
+  }
+  function reset(){
+    playing = false; finished = false; answered = false; last = 0; t = 0; visualF = 0;
+    lastUI = '';
+    cancelBtn.disabled = true;
+    updateUI();
+  }
+  function answer(){
+    if (!playing || t < 0.8 || t >= 21) return;
+    answered = true;
+    playing = false;
+    last = 0;
+    lastUI = '';
+    updateUI();
+  }
+  playBtn.addEventListener('click', start);
+  resetBtn.addEventListener('click', reset);
+  cancelBtn.addEventListener('click', answer);
+
+  window.__demo = { answer: function(){ answered = true; playing = false; lastUI = ''; updateUI(); }, seek: function(x){ t = x; var tf = Math.max(0, Math.min(1, (x - 2.0) / 1.0)); visualF = 1 - Math.pow(1 - tf, 3); lastUI = ''; updateUI(); }, get: function(){ return {t: t, answered: answered, playing: playing}; } };
+  resize();
+  requestAnimationFrame(tick);
+
+
+
+  applyLang(lang);
+})();
+</script>
+</body>
+</html>
